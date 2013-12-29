@@ -1,0 +1,77 @@
+Window "": # Window title
+# Window "konsole": # Resource name
+# Window "Konsole": # Class name
+
+#OK
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/28 "XKey/Return"
+
+#rev<<
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/48 "XKey/comma"
+
+#pause
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/57 "XKey/XF86AudioPlay"
+
+#fwd>>
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/15 "XKey/period"
+
+#stop
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/31 "XKey/x"
+
+#rev
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/18 "XKey/bracketright"
+
+#fwd
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/20 "XKey/bracketleft"
+
+#mute -> ESC
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/16 "XKey/Escape"
+
+#------------------------------------------------------------------------------------------------
+
+# arrow-left
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/105 "XKey/Left"
+# arrow-right
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/106 "XKey/Right"
+# arrow-up
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/103 "XKey/Up"
+# arrow-down
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/108 "XKey/Down"
+
+
+#vol+
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/78 "XKey/XF86AudioRaiseVolume"
+
+#vol-
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/74 "XKey/XF86AudioLowerVolume"
+
+
+#pg+
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/49 "XKey/XF86AudioNext"
+
+#pg-
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/25 "XKey/XF86AudioPrev"
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------
+
+#title
+#"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/38 "fill this in!"
+
+#subtitle
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/22 "XKey/t"
+
+#audio
+#"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/35 "fill this in!"
+
+#capture
+#"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/46 "fill this in!"
+
+#fulscreen
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/44 "XKey/backslash"
+
+#angle - zoom levels
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/30 "XKey/z"
+
+#eject
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/29 "XKey/s"
+"TopSeed Tech Corp. USB IR Combo Device " "/dev/input/event6" none key/18 "XKey/s"
+

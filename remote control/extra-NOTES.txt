@@ -1,0 +1,8 @@
+xdotool poate fi folosit pt "find window Y, focus it"
+	@see http://www.semicomplete.com/projects/xdotool/
+	@see http://stackoverflow.com/questions/4226636/how-to-execute-a-command-in-a-bash-script-and-then-focus-the-appearing-window/4228019#4228019
+	@see http://superuser.com/questions/142945/bash-command-to-focus-a-specific-window
+	
+xdotool search --name ".+Audacious" windowactivate 2>&1 | grep failed
+xdotool key XF86Tools
+	
