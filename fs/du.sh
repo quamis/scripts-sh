@@ -23,4 +23,4 @@ for D in `echo "$DIRS"`; do
 done;
 unset IFS;
 
-printf "\n\n%d items, totalling %8.2fGb\n" "$DIRSTOTAL" "$((100*TTL/1024/1024/1024))e-2";
+printf "\n\n%d items, totalling %8.3fGb\n" "$DIRSTOTAL" "$((100*TTL/1024/1024/1024))e-2";
