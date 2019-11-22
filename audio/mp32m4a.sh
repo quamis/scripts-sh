@@ -20,7 +20,7 @@ done
 : ${MAX_LOAD:="95%"};
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${RECURSE:="0"};
-: ${TMPDIR:="/media/stick/tmp/"};
+: ${TMPDIR:="/tmp/"};
 : ${COMMANDFILE:="$TMPDIR/commands.txt"};
 
 # @see https://stackoverflow.com/questions/16374028/unable-to-convert-mp3-to-m4a-using-ffmpeg
@@ -62,11 +62,12 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	#  -c:a aac : lower quality, but free
 	#  -c:a libfaac : lower quality, but free, old
 	#  -c:a libfdk_aac : higher quality, but non-free
+	#		also use -cutoff 18000
 	
 	# -vbr ${QUALITY_MAP_TO_KBS[$QUALITY]} : vbr, but aac code doesn;t cope well with this
 	# -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} : cbr, seems to work as expected
 	
-	CMD="(ffmpeg -loglevel panic -y -i \"${FILE_DIR_AND_NAME_AND_EXT}\" -c:a aac -vn -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} \"${TMP_FILE}.m4a\" && mv \"${TMP_FILE}.m4a\" \"${FILE_DIR}${FILE_NAME}.m4a\")"
+	CMD="(ffmpeg -loglevel panic -y -i \"${FILE_DIR_AND_NAME_AND_EXT}\" -c:a libfdk_aac -cutoff 18000 -vn -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} \"${TMP_FILE}.m4a\" && mv \"${TMP_FILE}.m4a\" \"${FILE_DIR}${FILE_NAME}.m4a\")"
 	
 	# append to the command list
 	echo "$CMD" >> "$COMMANDFILE";
