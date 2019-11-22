@@ -29,6 +29,8 @@ regexpEXT=`echo "$EXT" | sed s/\,/\|/g`
 
 # debug
 #find "${DIR}/" -type f -print | egrep "\.(${regexpEXT})$" | parallel --no-notice --bar --jobs $THREADS --load $MAX_LOAD -- "echo '>>> {} -> {.}.mp3'";
+
+# prod
 find "${DIR}/" -type f -print | egrep "\.(${regexpEXT})$" | parallel --no-notice --bar --jobs $THREADS --load $MAX_LOAD -- "ffmpeg -loglevel panic -i {} -y -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} {.}.mp3";
 
 #ls -1 ./*.flac | parallel --no-notice -j "1" -- "sleep 1; echo \"{}\";"
