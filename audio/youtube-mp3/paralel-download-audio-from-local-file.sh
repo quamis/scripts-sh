@@ -1,4 +1,7 @@
 #!/bin/bash
+
+#  pip3 install -U youtube-dl
+
 PLAYLISTFILE="$1";
 
 youtube-dl -j --flat-playlist --batch-file "$PLAYLISTFILE" > "$PLAYLISTFILE.01.jqfile"
