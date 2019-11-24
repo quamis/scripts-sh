@@ -1,10 +1,19 @@
 #!/bin/bash
 
+# @requires
+# jq
+# ffmpeg
+
 # mp32m4a.sh DIR='/media/ext1Tb/nextcloud/music/files/Radio Guerilla - Zona Libera/';
 #			sudo -u www-data php /var/www/html/nextcloud/occ files:scan --path='/lucian.sirbu/files/@muzica.mp3/testing/' --verbose
-
+#
 # OR, in order to re-encode everything as m4a:
 #		 mp32m4a.sh EXT="mp3,mp4,m4a,mp2" DIR="./"
+#
+# OR, in order to re-encode old mp3 tracks as m4a:
+#		mp32m4a.sh EXT="mp3" QUALITY="4" RUN_MODE="dry-run" DIR="./" QUALITY_AUTO=1 > /tmp/run.cmd
+#       mp32m4a.sh EXT="mp3" QUALITY="4" RUN_MODE="dry-run" DIR="./" QUALITY_AUTO=1 >> /tmp/run.cmd
+#		parallel --no-notice --bar --jobs 4 < /tmp/run.cmd
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
@@ -17,12 +26,14 @@ done
 : ${DIR:="./"};
 : ${EXT:="mp3,mp2"};
 : ${QUALITY:="4"};
+: ${QUALITY_AUTO:="0"}	# 0,1
 : ${MAX_LOAD:="95%"};
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${RECURSE:="0"};
-: ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${TMPDIR:="/tmp/"};
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
+: ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
+: ${VERBOSE:="0"};	# 0, 1
 
 
 
@@ -51,16 +62,18 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	FILE_EXT="${FILE_NAME##*.}"
 	FILE_NAME="${FILE_NAME%.*}"
 	FILE_NAME_WITH_EXT="${FILE_DIR_AND_NAME_AND_EXT##*/}"
-	FILE_DIR="${FILE_DIR_AND_NAME_AND_EXT%/*}"
+	FILE_DIR="${FILE_DIR_AND_NAME_AND_EXT%/*}/"
 	
-	TMP_FILE=`mktemp --tmpdir="${TMPDIR}"`
+	TMP_FILE=`mktemp "${TMPDIR}audio.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
 	
 	# DEBUGGING
-	#echo "FILE::$FILE_DIR_AND_NAME_AND_EXT"
-	#echo "    FILE_DIR:            $FILE_DIR"
-	#echo "    FILE_NAME_WITH_EXT:  $FILE_NAME_WITH_EXT"
-	#echo "    FILE_NAME:           $FILE_NAME"
-	#echo "    FILE_EXT:            $FILE_EXT"
+	if [ "$VERBOSE" = "1" ]; then
+		echo "FILE::$FILE_DIR_AND_NAME_AND_EXT"
+		echo "    FILE_DIR:            $FILE_DIR"
+		echo "    FILE_NAME_WITH_EXT:  $FILE_NAME_WITH_EXT"
+		echo "    FILE_NAME:           $FILE_NAME"
+		echo "    FILE_EXT:            $FILE_EXT"
+	fi;
 
 	# ffmpeg
 	#  -c:a aac : lower quality, but free
@@ -71,8 +84,32 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	# -vbr ${QUALITY_MAP_TO_KBS[$QUALITY]} : vbr, but aac code doesn;t cope well with this
 	# -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} : cbr, seems to work as expected
 	
-	CMD="(ffmpeg -loglevel panic -y -i \"${FILE_DIR_AND_NAME_AND_EXT}\" -c:a libfdk_aac -cutoff 18000 -vn -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} \"${TMP_FILE}.m4a\" && mv \"${TMP_FILE}.m4a\" \"${FILE_DIR}${FILE_NAME}.m4a\")"
+	if [ "$QUALITY_AUTO" = "1" ]; then
+		if [ "$FILE_EXT" = "mp3" ]; then	# this applies for mp3-conversion only
+			#kbps=`file "${FILE_DIR_AND_NAME_AND_EXT}" | egrep -o "[0-9]+ kbps" | sed "s/kbps//"`	
+			kbps=`ffprobe -v quiet -print_format json -show_format "${FILE_DIR_AND_NAME_AND_EXT}" | jq ".format.bit_rate" | sed 's/"//g' | sed 's/null/0/'`
+			kbps=$(( kbps/1000 ))
+			
+			QUALITY_NEW="${QUALITY}";
+			if (( kbps > 300 )); then
+				QUALITY_NEW="0";
+			elif (( kbps > 150 )); then
+				QUALITY_NEW="2";
+			elif (( kbps > 100 )); then
+				QUALITY_NEW="3";
+			fi;
+
+			QUALITY="$QUALITY_NEW"
+		fi;
+	fi
 	
+
+	CMD="(ffmpeg -loglevel panic -y -i \"${FILE_DIR_AND_NAME_AND_EXT}\" -c:a libfdk_aac -cutoff 18000 -vn -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} \"${TMP_FILE}\" && mv \"${TMP_FILE}\" \"${FILE_DIR}${FILE_NAME}.m4a\")"
+	
+	if [ "$VERBOSE" = "1" ]; then
+		echo "$CMD";
+	fi;
+
 	# append to the command list
 	echo "$CMD" >> "$COMMANDFILE";
 done;
