@@ -16,12 +16,15 @@ done
 
 : ${DIR:="./"};
 : ${EXT:="mp3,mp2"};
-: ${QUALITY:="5"};
+: ${QUALITY:="4"};
 : ${MAX_LOAD:="95%"};
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${RECURSE:="0"};
+: ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${TMPDIR:="/tmp/"};
-: ${COMMANDFILE:="$TMPDIR/commands.txt"};
+: ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
+
+
 
 # @see https://stackoverflow.com/questions/16374028/unable-to-convert-mp3-to-m4a-using-ffmpeg
 # @see https://trac.ffmpeg.org/wiki/Encode/AAC
@@ -32,12 +35,13 @@ echo > "$COMMANDFILE";
 # build a list of commands to run
 regexpEXT=`echo "$EXT" | sed s/\,/\|/g`;
 QUALITY_MAP_TO_KBS=( ['0']='192k' ['1']='164k' ['2']='128k' ['3']='96k' ['4']='64k' ['5']='56k' ['6']='48k' ['7']='32k' )
-#QUALITY_MAP_TO_KBS=( ['0']='5' ['1']='5' ['2']='4' ['3']='4' ['4']='3' ['5']='3' ['6']='2' ['7']='2' ['8']='1' ['9']='1'  )
 
 maxdepth="99999"
 if [ "$RECURSE" = "0" ]; then
 	maxdepth="1"
 fi;
+
+DIR=`realpath "${DIR}"`;
 
 SAVEIFS=$IFS
 IFS=$'\n'
@@ -80,10 +84,15 @@ IFS=$SAVEIFS
 # process the command list
 
 # simply display the "to-run" commands
-#cat "$COMMANDFILE";
+if [ "$RUN_MODE" = "parallel" ]; then
+	# run the list in paralel
+	# @see https://www.gnu.org/software/parallel/man.html
+	parallel --no-notice --bar --jobs $THREADS --load $MAX_LOAD < "$COMMANDFILE"
+elif [ "$RUN_MODE" = "dry-run" ]; then
+	cat "$COMMANDFILE";
+else
+	# TODO: sequential conversion
+	echo "Unknown run mode";
+fi;
 
-# run the list in paralel
-# @see https://www.gnu.org/software/parallel/man.html
-parallel --no-notice --bar --jobs $THREADS --load $MAX_LOAD < "$COMMANDFILE"
-
-# TODO: sequential conversion
+rm $COMMANDFILE;
