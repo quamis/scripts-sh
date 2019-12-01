@@ -27,13 +27,14 @@ done
 : ${EXT:="mp3,mp2"};
 : ${QUALITY:="4"};
 : ${QUALITY_AUTO:="0"}	# 0,1
-: ${MAX_LOAD:="95%"};
-: ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${RECURSE:="0"};
 : ${TMPDIR:="/tmp/"};
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
-: ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${VERBOSE:="0"};	# 0, 1
+
+: ${THREADS:="`parallel --no-notice --number-of-cores`"};
+: ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
+: ${MAX_LOAD:="95%"};
 
 
 
@@ -125,6 +126,8 @@ if [ "$RUN_MODE" = "parallel" ]; then
 	# run the list in paralel
 	# @see https://www.gnu.org/software/parallel/man.html
 	parallel --no-notice --bar --jobs $THREADS --load $MAX_LOAD < "$COMMANDFILE"
+elif [ "$RUN_MODE" = "sequential" ]; then
+	bash -x "$COMMANDFILE";
 elif [ "$RUN_MODE" = "dry-run" ]; then
 	cat "$COMMANDFILE";
 else
