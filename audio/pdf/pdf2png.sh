@@ -63,7 +63,7 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	fi;
 
     # for PNG quality encoding, see https://stackoverflow.com/questions/9710118/convert-multipage-pdf-to-png-and-back-linux/12046542#12046542
-	CMD="(mkdir -p ${FILE_NAME} && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}.png\")"
+	CMD="(mkdir -p ${FILE_NAME} && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}-%03d.png\")"
 	
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
