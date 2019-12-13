@@ -3,7 +3,7 @@
 # @requires
 # imagemagik/convert
 
-# pdf2png.sh DIR='/media/ext1Tb/nextcloud/music/files/Radio Guerilla - Zona Libera/';
+# update youtube-dl via: pip install -U youtube-dl
 
 
 # THIS ALLOWS INJECTING VARS into the local namespace
@@ -14,16 +14,18 @@ for ARGUMENT in "$@"; do
 	declare $KEY="$VALUE"
 done
 
+: ${LIST:=""};
+: ${URL:=""};
+
 : ${DIR:="./"};
-: ${EXT:="pdf"};
-: ${QUALITY:="90"};
-: ${DENSITY:="90"};
-: ${RECURSE:="0"};
+: ${SPEED_LIMIT_KB:="128"};
+: ${SLEEP_BETWEEN_REQUESTS:="2"};
+
 : ${TMPDIR:="/tmp/"};
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
 : ${VERBOSE:="0"};	# 0, 1
 
-: ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
+: ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
 
@@ -31,39 +33,31 @@ done
 # clear the command list
 echo > "$COMMANDFILE";
 
+if [[ "$LIST" == "" && "$URL" == "" ]]; then
+   echo "Please specify either LIST=filename or URL=http://...";
+   exit;
+fi
+
 # build a list of commands to run
-regexpEXT=`echo "$EXT" | sed s/\,/\|/g`;
-
-maxdepth="99999"
-if [ "$RECURSE" = "0" ]; then
-	maxdepth="1"
-fi;
-
+mkdir -p "${DIR}";
 DIR=`realpath "${DIR}"`;
 
 SAVEIFS=$IFS
 IFS=$'\n'
-for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${regexpEXT})$" | sort`; do
-	FILE_NAME=$(basename -- "${FILE}")
-	FILE_DIR_AND_NAME_AND_EXT="${FILE}"
-	FILE_EXT="${FILE_NAME##*.}"
-	FILE_NAME="${FILE_NAME%.*}"
-	FILE_NAME_WITH_EXT="${FILE_DIR_AND_NAME_AND_EXT##*/}"
-	FILE_DIR="${FILE_DIR_AND_NAME_AND_EXT%/*}/"
-	
+if [[ "$LIST" == "" && "$URL" != "" ]]; then
+	LIST="$URL"
+fi;
+
+for URL in `echo "$LIST" | sort`; do
 	# TMP_FILE=`mktemp "${TMPDIR}pdf.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
 	
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
-		echo "FILE::$FILE_DIR_AND_NAME_AND_EXT"
-		echo "    FILE_DIR:            $FILE_DIR"
-		echo "    FILE_NAME_WITH_EXT:  $FILE_NAME_WITH_EXT"
-		echo "    FILE_NAME:           $FILE_NAME"
-		echo "    FILE_EXT:            $FILE_EXT"
+		echo "URL: $URL"
 	fi;
 
-    # for PNG quality encoding, see https://stackoverflow.com/questions/9710118/convert-multipage-pdf-to-png-and-back-linux/12046542#12046542
-	CMD="(mkdir -p \"${FILE_NAME}\" && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}-%03d.png\")"
+    # for more options, see the manual
+	CMD="(mkdir -p \"${DIR}\" && youtube-dl -f \"bestaudio[ext=m4a]/bestaudio[ext=ogg]/bestaudio[ext=mp3]/bestaudio\" --sleep-interval=${SLEEP_BETWEEN_REQUESTS} --rate-limit=${SPEED_LIMIT_KB}k -c --extract-audio \"${URL}\" --output=\"${DIR}/%(playlist_index)s - %(title)s.%(ext)s\";)"
 	
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
