@@ -65,11 +65,24 @@ for URL in `echo "$LIST" | sort`; do
 
 	JSONTITLE=`echo "${HTML}" | egrep -o "\"headline\":[ ]*\"[^\"]+\""`
 	FAKEJSONTITLE="{${JSONTITLE}}"
-	TITLE=`echo ${FAKEJSONTITLE} | jq -r ".headline"`
+	TITLE=`echo ${FAKEJSONTITLE} | jq -r ".headline" | sed "s/null//"`
 	
+	HTMLTITLE=`echo "${HTML}" | egrep -o "<title>.+</title>" | sed -r "s/<(\/)?title>//g"`
+	if [ "$TITLE" = "" ]; then
+		if [ "$VERBOSE" = "1" ]; then
+			echo "Using page title: ${HTMLTITLE}"
+		fi;
+		TITLE="${HTMLTITLE}"
+	fi;
+
+	if [ "$VERBOSE" = "1" ]; then
+		echo "	media: $VIDEOURL"
+		echo "	title: $TITLE"
+	fi;
+
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && wget --limit-rate ${SPEED_LIMIT_KB}k -O \"${DIR}/${TITLE}.mp4\" \"${VIDEOURL}\";)"
+	CMD="(mkdir -p \"${DIR}\" && wget --continue --limit-rate ${SPEED_LIMIT_KB}k -O \"${DIR}/${TITLE}.mp4\" \"${VIDEOURL}\";)"
 	
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
