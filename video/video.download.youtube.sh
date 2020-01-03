@@ -58,7 +58,7 @@ for URL in `echo "$LIST" | sort`; do
 	fi;
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && youtube-dl --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --merge-output-format mp4 --write-description --encoding utf-8 \"${URL}\";)"
+	CMD="(mkdir -p \"${DIR}\" && youtube-dl --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
 	
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
