@@ -1,0 +1,189 @@
+#!/bin/bash
+
+# THIS ALLOWS INJECTING VARS into the local namespace
+# might not be very secure, be careful how you declare & check variables
+for ARGUMENT in "$@"; do
+    KEY=$(echo $ARGUMENT | cut -f1 -d=)
+    VALUE=$(echo $ARGUMENT | cut -f2 -d=)
+	declare $KEY="$VALUE"
+done
+
+: ${D1:=""};
+: ${D2:=""};
+
+: ${TMPDIR:="/tmp/"};
+: ${TRASH:="./trash/"};
+: ${LOG:="./log.log"};
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;36m'
+NC='\033[0m' # No Color
+
+if [ -z "$D1" ]; then
+    echo "Please specify D1, the new takeout source";
+    exit;
+fi;
+
+if [ -z "$D2" ]; then
+    echo "Please specify D2, the final, merged takeout destination";
+    exit;
+fi;
+
+TMP1=`mktemp --tmpdir="${TMPDIR}"`;
+TMP2=`mktemp --tmpdir="${TMPDIR}"`;
+TMP3=`mktemp --tmpdir="${TMPDIR}"`;
+TMP11=`mktemp --tmpdir="${TMPDIR}"`;
+TMP21=`mktemp --tmpdir="${TMPDIR}"`;
+
+rebuildImageList () {
+    find "$D1" ! -name "*.json" -type f -printf '%P\t%s\n'| sort > "$TMP1";
+    find "$D2" ! -name "*.json" -type f -printf '%P\t%s\n'| sort > "$TMP2";
+
+    cat "$TMP1" | cut -d$'\t' -f1 | sort > "$TMP11";
+    cat "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP21";
+}
+
+{
+    printf "\n\n\n";
+    printf "\n${YELLOW}======================================================${NC}\n";
+    printf "\nstarted at: %s" "`date "+%Y-%m-%d %H:%M:%S"`";
+
+    # build the list of image and movies, ignoring json files
+    rebuildImageList;
+
+    D1_FILES_COUNT=`cat "$TMP11" | wc -l`;
+    D2_FILES_COUNT=`cat "$TMP21" | wc -l`;
+    COMMON_FILES_COUNT=`comm --output-delimiter=""  -12 "$TMP11" "$TMP21" | wc -l`;
+    IDENTICAL_FILES_COUNT=`comm --output-delimiter=""  -12 "$TMP1" "$TMP2" | wc -l`;
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;36m'
+    NC='\033[0m' # No Color
+
+    printf "\nD1 has:    %9d files" ${D1_FILES_COUNT};
+    printf "\nD2 has:    %9d files" ${D2_FILES_COUNT};
+    printf "\nCommon:    %9d files" ${COMMON_FILES_COUNT};
+    printf "\nIdentical: %9d files" ${IDENTICAL_FILES_COUNT};
+
+    # new files, only in D2. These are actually OLD files, and were deleted in D1
+    #comm --output-delimiter=""  -13 "$TMP11" "$TMP21"
+
+    # new files, only in D1. These should get copied over to D2
+    #comm --output-delimiter=""  -23 "$TMP11" "$TMP21" 
+    printf "\n${YELLOW}======================================================${NC}\n";
+
+
+    mkdir -p "$TRASH";
+
+    if [ ! -f "$D2/original_takeout.lock" ]; then
+        printf "\n${RED}D2 should be the final merge target${NC}";
+        printf "\nIf you are sure that's the final target, put the 'original_takeout.lock' in the root folder\n";
+        exit;
+    fi;
+
+    # 1. delete identical files in D1
+    printf "\n${GREEN}delete identical files in D1${NC}";
+    comm --output-delimiter=""  -12 "$TMP1" "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP11";
+    COUNT=$(( 0 ));
+    for F in `cat "$TMP11"`; do
+        COUNT=$(( $COUNT + 1 ));
+        D1FILE="$D1/$F";
+        printf "\n%6s: $D1FILE" "delete";
+        #rm -f "$D1FILE";   # TODO: make this optional & add dry-run
+        mv "$D1FILE" "$TRASH";
+    done;
+    printf "\n${YELLOW}%9d %s${NC}" $COUNT "files deleted";
+    printf "\n";
+
+
+    # 2. move new files from D1 to D2
+    printf "\n${GREEN}move new files from D1 to D2${NC}";
+    rebuildImageList;
+    comm --output-delimiter=""  -23 "$TMP11" "$TMP21" > "$TMP3";
+    COUNT=$(( 0 ));
+    for F in `cat "$TMP3"`; do
+        COUNT=$(( $COUNT + 1 ));
+        D1FILE="$D1/$F";
+        D2FILE="$D2/$F";
+        
+        D2DIR=`dirname "$D2FILE"`;
+        if [ ! -d "$D2DIR" ]; then
+            printf "\n%6s: $D2DIR" "mkdir";
+            mkdir -p "$D2DIR";
+        fi;
+
+        printf "\n%6s: $D1FILE" "move";
+        printf "\n%6s: $D2FILE" "to";
+        
+        mv "$D1FILE" "$D2FILE";
+    done;
+    printf "\n${YELLOW}%9d %s${NC}" $COUNT "files moved";
+    printf "\n";
+
+
+    # 3. lookup changed files, move files if larger, delete if smaller
+    printf "\n${GREEN}lookup changed files, move files if larger, delete if smaller${NC}";
+    rebuildImageList;
+    comm --output-delimiter=""  -12 "$TMP11" "$TMP21" > "$TMP3";
+    COUNT1=$(( 0 ));
+    COUNT2=$(( 0 ));
+    for F in `cat "$TMP3"`; do
+        D1FILE="$D1/$F";
+        D2FILE="$D2/$F";
+        
+        D2DIR=`dirname "$D2FILE"`;
+        if [ ! -d "$D2DIR" ]; then
+            printf "\n%6s: $D2DIR" "mkdir";
+            mkdir -p "$D2DIR";
+        fi;
+
+        F1SIZE=$( stat --format="%s" "$D1FILE" );
+        F2SIZE=$( stat --format="%s" "$D2FILE" );
+
+        if [ "$F1SIZE" -gt "$F2SIZE" ]; then
+            COUNT1=$(( $COUNT + 1 ));
+
+            printf "\n%6s: $D1FILE" "move";
+            printf "\n%6s: $D2FILE" "to";
+            mv "$D1FILE" "$D2FILE";
+        else
+            COUNT2=$(( $COUNT + 1 ));
+
+            printf "\n%6s: $D1FILE" "delete";
+            #rm -f "$D1FILE";
+            mv "$D1FILE" "$TRASH";
+        fi;
+    done;
+    printf "\n${YELLOW}%9d %s, %d %s${NC}" $COUNT1 "files moved" $COUNT2 "files deleted";
+    printf "\n";
+
+
+    # next, we're left with json files, these should simply get copied over, As we can assume they're newer
+    # build the list of files
+    printf "\n${GREEN}we're left with json files, these should simply get copied over, As we can assume they're newer${NC}";
+    find "$D1" -name "*.json" -type f -printf '%P\t%s\n'| sort > "$TMP1";
+    cat "$TMP1" | cut -d$'\t' -f1 | sort > "$TMP3";
+    COUNT=$(( 0 ));
+    for F in `cat "$TMP3"`; do
+        COUNT=$(( $COUNT + 1 ));
+        D1FILE="$D1/$F";
+        D2FILE="$D2/$F";
+        
+        D2DIR=`dirname "$D2FILE"`;
+        if [ ! -d "$D2DIR" ]; then
+            printf "\n%6s: $D2DIR" "mkdir";
+            mkdir -p "$D2DIR";
+        fi;
+
+        printf "\n%6s: $D1FILE" "move";
+        printf "\n%6s: $D2FILE" "to";
+        mv "$D1FILE" "$D2FILE";
+    done;
+    printf "\n${YELLOW}%9d %s,${NC}" $COUNT1 "files moved";
+    printf "\nfinished at: %s" "`date "+%Y-%m-%d %H:%M:%S"`";
+    printf "\n\n\n\n";
+}  2>&1 | tee -a "$LOG";
