@@ -4,7 +4,7 @@
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
-    VALUE=$(echo $ARGUMENT | cut -f2 -d=)
+    VALUE=$(echo $ARGUMENT | cut -f2- -d=)
 	declare $KEY="$VALUE"
 done
 
@@ -49,15 +49,19 @@ rebuildImageList () {
 
 custom_rm () {
     D1FILE="$1";
-    if [ "$RUN_MODE" = "dry-run" ]; then
-        printf "\n%6s: $D1FILE" "delete";
+    REASON="$2";
+    printf "\n%6s: '$D1FILE'" "delete";
+    if [ ! "$REASON" = "" ]; then
+        printf ", %s" "$REASON";
+    fi;
 
+    if [ "$RUN_MODE" = "dry-run" ]; then
+        # do nothing
+        :
     elif [ "$RUN_MODE" = "safe" ]; then
-        printf "\n%6s: $D1FILE" "delete";
         mv "$D1FILE" "$TRASH";
 
     elif [ "$RUN_MODE" = "unsafe" ]; then
-        printf "\n%6s: $D1FILE" "delete";
         rm -f "$D1FILE"; 
     else
         printf "\n invalid RUN_MODE";
@@ -67,15 +71,20 @@ custom_rm () {
 
 custom_mkdir () {
     D="$1";
+    REASON="$2";
+    printf "\n%6s: '$D'" "mkdir";
+    if [ ! "$REASON" = "" ]; then
+        printf ", %s" "$REASON";
+    fi;
+
     if [ "$RUN_MODE" = "dry-run" ]; then
-        printf "\n%6s: $D" "mkdir";
+        # do nothing
+        :
 
     elif [ "$RUN_MODE" = "safe" ]; then
-        printf "\n%6s: $D" "mkdir";
         mkdir -p "$D";
 
     elif [ "$RUN_MODE" = "unsafe" ]; then
-        printf "\n%6s: $D" "mkdir";
         mkdir -p "$D";
     else
         printf "\n invalid RUN_MODE";
@@ -86,20 +95,21 @@ custom_mkdir () {
 custom_mv () {
     D1FILE="$1";
     D2FILE="$2";
+    REASON="$3";
+    printf "\n%6s: '$D1FILE'" "move";
+    printf "\n%6s: '$D2FILE'" "to";
+    if [ ! "$REASON" = "" ]; then
+        printf ", %s" "$REASON";
+    fi;
+
     if [ "$RUN_MODE" = "dry-run" ]; then
-        printf "\n%6s: $D1FILE" "move";
-        printf "\n%6s: $D2FILE" "to";
+        # do nothing
+        :
 
     elif [ "$RUN_MODE" = "safe" ]; then
-        printf "\n%6s: $D1FILE" "move";
-        printf "\n%6s: $D2FILE" "to";
-        
         mv "$D1FILE" "$D2FILE";
 
     elif [ "$RUN_MODE" = "unsafe" ]; then
-        printf "\n%6s: $D1FILE" "move";
-        printf "\n%6s: $D2FILE" "to";
-        
         mv "$D1FILE" "$D2FILE";
     else
         printf "\n invalid RUN_MODE";
@@ -162,6 +172,7 @@ custom_mv () {
     fi;
 
     # 1. delete identical files in D1
+    printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}delete identical files from D1, also in D2${NC}";
     comm --output-delimiter=""  -12 "$TMP1" "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP11";
     COUNT=$(( 0 ));
@@ -178,6 +189,7 @@ custom_mv () {
 
 
     # 2. move new files from D1 to D2
+    printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}move new files from D1 to D2${NC}";
     rebuildImageList;
     comm --output-delimiter=""  -23 "$TMP11" "$TMP21" > "$TMP3";
@@ -201,6 +213,7 @@ custom_mv () {
 
 
     # 3. lookup changed files, move files if larger, delete if smaller
+    printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}lookup changed files, move files to D2 if larger, delete from D1 if smaller${NC}";
     rebuildImageList;
     comm --output-delimiter=""  -12 "$TMP11" "$TMP21" > "$TMP3";
@@ -225,7 +238,11 @@ custom_mv () {
             custom_mv "$D1FILE" "$D2FILE";
         else
             COUNT2=$(( $COUNT + 1 ));
-            custom_rm "$D1FILE";
+            if [ "$F1SIZE" -eq "$F2SIZE" ]; then
+                custom_rm "$D1FILE" "equal filesizes";
+            else
+                custom_rm "$D1FILE" "`printf "%s vs %s"` $F1SIZE $F2SIZE";
+            fi;
         fi;
     done;
     unset IFS;
@@ -235,6 +252,7 @@ custom_mv () {
 
     # next, we're left with json files, these should simply get copied over, As we can assume they're newer
     # build the list of files
+    printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}we're left with json files, these should simply get copied over, as we can assume they're newer${NC}";
     find "$D1" -name "*.json" -type f -printf '%P\t%s\n'| sort > "$TMP1";
     cat "$TMP1" | cut -d$'\t' -f1 | sort > "$TMP3";
