@@ -14,6 +14,8 @@ done
 : ${TMPDIR:="/tmp/"};
 : ${TRASH:="./trash/"};
 : ${LOG:="./log.log"};
+: ${LOG:="./log.log"};
+: ${RUN_MODE:="dry-run"};
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -45,11 +47,85 @@ rebuildImageList () {
     cat "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP21";
 }
 
+custom_rm () {
+    D1FILE="$1";
+    if [ "$RUN_MODE" = "dry-run" ]; then
+        printf "\n%6s: $D1FILE" "delete";
+
+    elif [ "$RUN_MODE" = "safe" ]; then
+        printf "\n%6s: $D1FILE" "delete";
+        mv "$D1FILE" "$TRASH";
+
+    elif [ "$RUN_MODE" = "unsafe" ]; then
+        printf "\n%6s: $D1FILE" "delete";
+        rm -f "$D1FILE"; 
+    else
+        printf "\n invalid RUN_MODE";
+        exit;
+    fi;
+}
+
+custom_mkdir () {
+    D="$1";
+    if [ "$RUN_MODE" = "dry-run" ]; then
+        printf "\n%6s: $D" "mkdir";
+
+    elif [ "$RUN_MODE" = "safe" ]; then
+        printf "\n%6s: $D" "mkdir";
+        mkdir -p "$D";
+
+    elif [ "$RUN_MODE" = "unsafe" ]; then
+        printf "\n%6s: $D" "mkdir";
+        mkdir -p "$D";
+    else
+        printf "\n invalid RUN_MODE";
+        exit;
+    fi;
+}
+
+custom_mv () {
+    D1FILE="$1";
+    D2FILE="$2";
+    if [ "$RUN_MODE" = "dry-run" ]; then
+        printf "\n%6s: $D1FILE" "move";
+        printf "\n%6s: $D2FILE" "to";
+
+    elif [ "$RUN_MODE" = "safe" ]; then
+        printf "\n%6s: $D1FILE" "move";
+        printf "\n%6s: $D2FILE" "to";
+        
+        mv "$D1FILE" "$D2FILE";
+
+    elif [ "$RUN_MODE" = "unsafe" ]; then
+        printf "\n%6s: $D1FILE" "move";
+        printf "\n%6s: $D2FILE" "to";
+        
+        mv "$D1FILE" "$D2FILE";
+    else
+        printf "\n invalid RUN_MODE";
+        exit;
+    fi;
+}
+
 {
     printf "\n\n\n";
     printf "\n${YELLOW}======================================================${NC}\n";
     printf "\nstarted at: %s" "`date "+%Y-%m-%d %H:%M:%S"`";
+    
+    if [ "$RUN_MODE" = "dry-run" ]; then
+        printf "\nRUN_MODE:   ${YELLOW}%s${NC}" "$RUN_MODE";
 
+    elif [ "$RUN_MODE" = "safe" ]; then
+        printf "\nRUN_MODE:   ${GREEN}%s${NC}" "$RUN_MODE";
+        printf "\n ... wait 5 seconds, in case you change your mind";
+        sleep 5;
+
+    elif [ "$RUN_MODE" = "unsafe" ]; then
+        printf "\nRUN_MODE:   ${RED}%s${NC}" "$RUN_MODE";
+        printf "\n ... wait 15 seconds, in case you change your mind";
+        sleep 15;
+    fi;
+    
     # build the list of image and movies, ignoring json files
     rebuildImageList;
 
@@ -77,7 +153,7 @@ rebuildImageList () {
     printf "\n${YELLOW}======================================================${NC}\n";
 
 
-    mkdir -p "$TRASH";
+    custom_mkdir "$TRASH";
 
     if [ ! -f "$D2/original_takeout.lock" ]; then
         printf "\n${RED}D2 should be the final merge target${NC}";
@@ -86,16 +162,17 @@ rebuildImageList () {
     fi;
 
     # 1. delete identical files in D1
-    printf "\n${GREEN}delete identical files in D1${NC}";
+    printf "\n${GREEN}delete identical files from D1, also in D2${NC}";
     comm --output-delimiter=""  -12 "$TMP1" "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP11";
     COUNT=$(( 0 ));
+    IFS=$'\n';
     for F in `cat "$TMP11"`; do
         COUNT=$(( $COUNT + 1 ));
         D1FILE="$D1/$F";
-        printf "\n%6s: $D1FILE" "delete";
-        #rm -f "$D1FILE";   # TODO: make this optional & add dry-run
-        mv "$D1FILE" "$TRASH";
+
+        custom_rm "$D1FILE";
     done;
+    unset IFS;
     printf "\n${YELLOW}%9d %s${NC}" $COUNT "files deleted";
     printf "\n";
 
@@ -105,6 +182,7 @@ rebuildImageList () {
     rebuildImageList;
     comm --output-delimiter=""  -23 "$TMP11" "$TMP21" > "$TMP3";
     COUNT=$(( 0 ));
+    IFS=$'\n';
     for F in `cat "$TMP3"`; do
         COUNT=$(( $COUNT + 1 ));
         D1FILE="$D1/$F";
@@ -112,33 +190,31 @@ rebuildImageList () {
         
         D2DIR=`dirname "$D2FILE"`;
         if [ ! -d "$D2DIR" ]; then
-            printf "\n%6s: $D2DIR" "mkdir";
-            mkdir -p "$D2DIR";
+            custom_mkdir "$D2DIR"
         fi;
 
-        printf "\n%6s: $D1FILE" "move";
-        printf "\n%6s: $D2FILE" "to";
-        
-        mv "$D1FILE" "$D2FILE";
+        custom_mv "$D1FILE" "$D2FILE";
     done;
+    unset IFS;
     printf "\n${YELLOW}%9d %s${NC}" $COUNT "files moved";
     printf "\n";
 
 
     # 3. lookup changed files, move files if larger, delete if smaller
-    printf "\n${GREEN}lookup changed files, move files if larger, delete if smaller${NC}";
+    printf "\n${GREEN}lookup changed files, move files to D2 if larger, delete from D1 if smaller${NC}";
     rebuildImageList;
     comm --output-delimiter=""  -12 "$TMP11" "$TMP21" > "$TMP3";
     COUNT1=$(( 0 ));
     COUNT2=$(( 0 ));
+
+    IFS=$'\n';
     for F in `cat "$TMP3"`; do
         D1FILE="$D1/$F";
         D2FILE="$D2/$F";
         
         D2DIR=`dirname "$D2FILE"`;
         if [ ! -d "$D2DIR" ]; then
-            printf "\n%6s: $D2DIR" "mkdir";
-            mkdir -p "$D2DIR";
+            custom_mkdir "$D2DIR";
         fi;
 
         F1SIZE=$( stat --format="%s" "$D1FILE" );
@@ -146,28 +222,24 @@ rebuildImageList () {
 
         if [ "$F1SIZE" -gt "$F2SIZE" ]; then
             COUNT1=$(( $COUNT + 1 ));
-
-            printf "\n%6s: $D1FILE" "move";
-            printf "\n%6s: $D2FILE" "to";
-            mv "$D1FILE" "$D2FILE";
+            custom_mv "$D1FILE" "$D2FILE";
         else
             COUNT2=$(( $COUNT + 1 ));
-
-            printf "\n%6s: $D1FILE" "delete";
-            #rm -f "$D1FILE";
-            mv "$D1FILE" "$TRASH";
+            custom_rm "$D1FILE";
         fi;
     done;
+    unset IFS;
     printf "\n${YELLOW}%9d %s, %d %s${NC}" $COUNT1 "files moved" $COUNT2 "files deleted";
     printf "\n";
 
 
     # next, we're left with json files, these should simply get copied over, As we can assume they're newer
     # build the list of files
-    printf "\n${GREEN}we're left with json files, these should simply get copied over, As we can assume they're newer${NC}";
+    printf "\n${GREEN}we're left with json files, these should simply get copied over, as we can assume they're newer${NC}";
     find "$D1" -name "*.json" -type f -printf '%P\t%s\n'| sort > "$TMP1";
     cat "$TMP1" | cut -d$'\t' -f1 | sort > "$TMP3";
     COUNT=$(( 0 ));
+    IFS=$'\n';
     for F in `cat "$TMP3"`; do
         COUNT=$(( $COUNT + 1 ));
         D1FILE="$D1/$F";
@@ -175,15 +247,23 @@ rebuildImageList () {
         
         D2DIR=`dirname "$D2FILE"`;
         if [ ! -d "$D2DIR" ]; then
-            printf "\n%6s: $D2DIR" "mkdir";
-            mkdir -p "$D2DIR";
+            custom_mkdir "$D2DIR";
         fi;
 
-        printf "\n%6s: $D1FILE" "move";
-        printf "\n%6s: $D2FILE" "to";
-        mv "$D1FILE" "$D2FILE";
+        custom_mv "$D1FILE" "$D2FILE";
     done;
+    unset IFS;
     printf "\n${YELLOW}%9d %s,${NC}" $COUNT1 "files moved";
     printf "\nfinished at: %s" "`date "+%Y-%m-%d %H:%M:%S"`";
+
+    rm -f "$TMP1";
+    rm -f "$TMP2";
+    rm -f "$TMP3";
+    rm -f "$TMP11";
+    rm -f "$TMP21";
+
+    printf "\n\n";
+    printf "\n${YELLOW}script finished. Please inspect the trash folder, and any other leftover files";
+
     printf "\n\n\n\n";
 }  2>&1 | tee -a "$LOG";
