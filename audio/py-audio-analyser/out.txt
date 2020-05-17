@@ -1,0 +1,1 @@
+ASplit.py <src.mp3> <silence duration in seconds> <threshold amplitude 0.0 .. 1.0>
