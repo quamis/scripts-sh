@@ -15,6 +15,7 @@ for ARGUMENT in "$@"; do
 done
 
 : ${LIST:=""};
+: ${LISTFILE:=""};
 : ${URL:=""};
 
 : ${DIR:="./"};
@@ -33,8 +34,8 @@ done
 # clear the command list
 echo > "$COMMANDFILE";
 
-if [[ "$LIST" == "" && "$URL" == "" ]]; then
-   echo "Please specify either LIST=filename or URL=http://...";
+if [[ "$LIST" == "" && "$URL" == ""  && "$LISTFILE" == "" ]]; then
+   echo "Please specify either LIST=filename or URL=http://... ";
    exit;
 fi
 
@@ -46,6 +47,9 @@ SAVEIFS=$IFS
 IFS=$'\n'
 if [[ "$LIST" == "" && "$URL" != "" ]]; then
 	LIST="$URL"
+fi;
+if [[ "$LIST" == "" && "$LISTFILE" != "" ]]; then
+    LIST=$(cat "$LISTFILE");
 fi;
 
 for URL in `echo "$LIST" | sort`; do
