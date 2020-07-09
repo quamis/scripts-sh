@@ -14,6 +14,10 @@
 #		mp32m4a.sh EXT="mp3" QUALITY="4" RUN_MODE="dry-run" DIR="./" QUALITY_AUTO=1 > /tmp/run.cmd
 #       mp32m4a.sh EXT="mp3" QUALITY="4" RUN_MODE="dry-run" DIR="./" QUALITY_AUTO=1 >> /tmp/run.cmd
 #		parallel --no-notice --bar --jobs 4 < /tmp/run.cmd
+#
+# OR, in order to re-encode flac files:
+#		audio.mp32m4a.sh EXT=flac QUALITY=2 RUN_MODE="dry-run" DIR="./" RECURSE=1 > /tmp/run.cmd
+#		parallel --no-notice --bar --jobs 4 < /tmp/run.cmd
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
@@ -39,6 +43,8 @@ done
 
 
 # @see https://stackoverflow.com/questions/16374028/unable-to-convert-mp3-to-m4a-using-ffmpeg
+# @see https://trac.ffmpeg.org/wiki/CompilationGuide
+#	@see https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 # @see https://trac.ffmpeg.org/wiki/Encode/AAC
 
 # clear the command list

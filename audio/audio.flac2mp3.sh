@@ -14,7 +14,7 @@ done
 : ${EXT:="flac,wav"};
 : ${QUALITY:="2"};
 : ${MAX_LOAD:="95%"};
-: ${THREADS:="4"};
+: ${THREADS:="`parallel --no-notice --number-of-cores`"};
 
 # sequential conversion
 #for a in ./*.flac; do
