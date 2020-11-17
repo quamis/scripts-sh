@@ -2,7 +2,7 @@
 
 # @requires
 # jq
-# ffmpeg
+# ffmpeg, recompiled, see below for instructions
 
 # mp32m4a.sh DIR='/media/ext1Tb/nextcloud/music/files/Radio Guerilla - Zona Libera/';
 #			sudo -u www-data php /var/www/html/nextcloud/occ files:scan --path='/lucian.sirbu/files/@muzica.mp3/testing/' --verbose
@@ -23,7 +23,7 @@
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
-    VALUE=$(echo $ARGUMENT | cut -f2- -d=)   
+    VALUE=$(echo $ARGUMENT | cut -f2- -d=)
 	declare $KEY="$VALUE"
 done
 
@@ -46,6 +46,38 @@ done
 # @see https://trac.ffmpeg.org/wiki/CompilationGuide
 #	@see https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 # @see https://trac.ffmpeg.org/wiki/Encode/AAC
+
+# on Ubuntu you may do:
+#	@see https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
+#
+#	sudo apt-get update -qq && sudo apt-get -y install autoconf automake build-essential cmake git-core libass-dev libfreetype6-dev libtool libvorbis-dev pkg-config texinfo wget zlib1g-dev nasm yasm libx264-dev libx265-dev libnuma-dev libvpx-dev libfdk-aac-dev libmp3lame-dev libopus-dev
+#
+#    mkdir ffmpeg_sources && \
+#    cd ~/ffmpeg_sources && \
+#    wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
+#    tar xjvf ffmpeg-snapshot.tar.bz2 && \
+#    cd ffmpeg && \
+#    PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
+#      --prefix="$HOME/ffmpeg_build" \
+#      --pkg-config-flags="--static" \
+#      --extra-cflags="-I$HOME/ffmpeg_build/include" \
+#      --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
+#      --extra-libs="-lpthread -lm" \
+#      --bindir="$HOME/bin" \
+#      --enable-gpl \
+#      --enable-libass \
+#      --enable-libfdk-aac \
+#      --enable-libfreetype \
+#      --enable-libmp3lame \
+#      --enable-libopus \
+#      --enable-libvorbis \
+#      --enable-libvpx \
+#      --enable-libx264 \
+#      --enable-libx265 \
+#      --enable-nonfree && \
+#    PATH="$HOME/bin:$PATH" make && \
+#    make install && \
+#    hash -r
 
 # clear the command list
 echo > "$COMMANDFILE";
@@ -70,9 +102,9 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	FILE_NAME="${FILE_NAME%.*}"
 	FILE_NAME_WITH_EXT="${FILE_DIR_AND_NAME_AND_EXT##*/}"
 	FILE_DIR="${FILE_DIR_AND_NAME_AND_EXT%/*}/"
-	
+
 	TMP_FILE=`mktemp "${TMPDIR}audio.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
-	
+
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
 		echo "FILE::$FILE_DIR_AND_NAME_AND_EXT"
@@ -87,16 +119,16 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	#  -c:a libfaac : lower quality, but free, old
 	#  -c:a libfdk_aac : higher quality, but non-free
 	#		also use -cutoff 18000
-	
+
 	# -vbr ${QUALITY_MAP_TO_KBS[$QUALITY]} : vbr, but aac code doesn;t cope well with this
 	# -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} : cbr, seems to work as expected
-	
+
 	if [ "$QUALITY_AUTO" = "1" ]; then
 		if [ "$FILE_EXT" = "mp3" ]; then	# this applies for mp3-conversion only
-			#kbps=`file "${FILE_DIR_AND_NAME_AND_EXT}" | egrep -o "[0-9]+ kbps" | sed "s/kbps//"`	
+			#kbps=`file "${FILE_DIR_AND_NAME_AND_EXT}" | egrep -o "[0-9]+ kbps" | sed "s/kbps//"`
 			kbps=`ffprobe -v quiet -print_format json -show_format "${FILE_DIR_AND_NAME_AND_EXT}" | jq ".format.bit_rate" | sed 's/"//g' | sed 's/null/0/'`
 			kbps=$(( kbps/1000 ))
-			
+
 			QUALITY_NEW="${QUALITY}";
 			if (( kbps > 300 )); then
 				QUALITY_NEW="0";
@@ -109,10 +141,10 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 			QUALITY="$QUALITY_NEW"
 		fi;
 	fi
-	
+
 
 	CMD="(ffmpeg -loglevel panic -y -i \"${FILE_DIR_AND_NAME_AND_EXT}\" -c:a libfdk_aac -cutoff 18000 -vn -b:a ${QUALITY_MAP_TO_KBS[$QUALITY]} \"${TMP_FILE}\" && mv \"${TMP_FILE}\" \"${FILE_DIR}${FILE_NAME}.m4a\")"
-	
+
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
 	fi;
