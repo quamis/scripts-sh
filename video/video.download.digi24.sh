@@ -62,7 +62,13 @@ for URL in `echo "$LIST" | sort`; do
 
 	#VIDEOURL=`wget -q -O- "${URL}" | egrep -o "\"http[^\"]+mp4\"" | tail -n 1 | sed -e "s/^\"//" | sed -e "s/\"$//"`
 	HTML=`wget -q -O- "${URL}"`
-	VIDEODATE=$( date --date=`echo "${HTML}" | grep -oP "<time datetime=\"\K([^\"]+)"` "+%Y-%m-%d %H:%M")
+	D=`echo "${HTML}" | grep -oP "<time datetime=\"\K([^\"]+)"`;
+	if [ "$D" != "" ]; then
+		VIDEODATE=$( date --date="${D}" "+%Y-%m-%d %H:%M");
+	else
+		VIDEODATE="0000-00-00 00:00";
+	fi;
+
 	JSONVIDEOURL=`echo "${HTML}" | egrep -o "\"http[^\"]+mp4\"" | tail -n 1`;
 	FAKEJSONVIDEOURL="{\"source\":${JSONVIDEOURL}}"
 	VIDEOURL=`echo ${FAKEJSONVIDEOURL} | jq -r ".source"`
