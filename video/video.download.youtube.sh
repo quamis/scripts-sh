@@ -36,7 +36,7 @@ done
 echo > "$COMMANDFILE";
 
 if [[ "$LIST" == "" && "$URL" == ""  && "$LISTFILE" == "" ]]; then
-   echo "Please specify either LIST=filename or URL=http://... ";
+   echo "Please specify either LIST=filename or URL=http://...  or LISTFILE=list.txt";
    exit;
 fi
 
@@ -55,7 +55,7 @@ fi;
 
 for URL in `echo "$LIST" | sort`; do
 	# TMP_FILE=`mktemp "${TMPDIR}pdf.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
-	
+
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
 		echo "URL: $URL"
@@ -63,7 +63,7 @@ for URL in `echo "$LIST" | sort`; do
 
     # for more options, see the manual
 	CMD="(mkdir -p \"${DIR}\" && youtube-dl --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-	
+
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
 	fi;

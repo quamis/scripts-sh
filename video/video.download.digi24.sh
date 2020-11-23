@@ -11,7 +11,7 @@
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
-    VALUE=$(echo $ARGUMENT | cut -f2- -d=)   
+    VALUE=$(echo $ARGUMENT | cut -f2- -d=)
 	declare $KEY="$VALUE"
 done
 
@@ -34,8 +34,8 @@ done
 # clear the command list
 echo > "$COMMANDFILE";
 
-if [[ "$LIST" == "" && "$URL" == "" ]]; then
-   echo "Please specify either LIST=filename or URL=http://...";
+if [[ "$LIST" == "" && "$URL" == ""  && "$LISTFILE" == "" ]]; then
+   echo "Please specify either LIST=filename or URL=http://...  or LISTFILE=list.txt";
    exit;
 fi
 
@@ -48,10 +48,13 @@ IFS=$'\n'
 if [[ "$LIST" == "" && "$URL" != "" ]]; then
 	LIST="$URL"
 fi;
+if [[ "$LIST" == "" && "$LISTFILE" != "" ]]; then
+    LIST=$(cat "$LISTFILE");
+fi;
 
 for URL in `echo "$LIST" | sort`; do
 	# TMP_FILE=`mktemp "${TMPDIR}pdf.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
-	
+
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
 		echo "URL: $URL"
@@ -59,14 +62,15 @@ for URL in `echo "$LIST" | sort`; do
 
 	#VIDEOURL=`wget -q -O- "${URL}" | egrep -o "\"http[^\"]+mp4\"" | tail -n 1 | sed -e "s/^\"//" | sed -e "s/\"$//"`
 	HTML=`wget -q -O- "${URL}"`
-	JSONVIDEOURL=`echo "${HTML}" | egrep -o "\"http[^\"]+mp4\"" | tail -n 1`
+	VIDEODATE=$( date --date=`echo "${HTML}" | grep -oP "<time datetime=\"\K([^\"]+)"` "+%Y-%m-%d %H:%M")
+	JSONVIDEOURL=`echo "${HTML}" | egrep -o "\"http[^\"]+mp4\"" | tail -n 1`;
 	FAKEJSONVIDEOURL="{\"source\":${JSONVIDEOURL}}"
 	VIDEOURL=`echo ${FAKEJSONVIDEOURL} | jq -r ".source"`
 
 	JSONTITLE=`echo "${HTML}" | egrep -o "\"headline\":[ ]*\"[^\"]+\""`
 	FAKEJSONTITLE="{${JSONTITLE}}"
 	TITLE=`echo ${FAKEJSONTITLE} | jq -r ".headline" | sed "s/null//"`
-	
+
 	HTMLTITLE=`echo "${HTML}" | egrep -o "<title>.+</title>" | sed -r "s/<(\/)?title>//g"`
 	if [ "$TITLE" = "" ]; then
 		if [ "$VERBOSE" = "1" ]; then
@@ -82,8 +86,8 @@ for URL in `echo "$LIST" | sort`; do
 
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && wget --continue --limit-rate ${SPEED_LIMIT_KB}k -O \"${DIR}/${TITLE}.mp4\" \"${VIDEOURL}\";)"
-	
+	CMD="(mkdir -p \"${DIR}\" && wget --continue --limit-rate ${SPEED_LIMIT_KB}k -O \"${DIR}/${VIDEODATE} - ${TITLE}.mp4\" \"${VIDEOURL}\";)"
+
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
 	fi;
