@@ -3,14 +3,19 @@
 # @requires
 # imagemagik/convert
 
-# update youtube-dl via: pip install -U youtube-dl
+# if installed via pip, update is done like this:
+# 	pip install -U youtube-dl
+# to check if installed via pip, do this:
+# 	pip list | grep youtube-dl
+
+
 
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
-    VALUE=$(echo $ARGUMENT | cut -f2- -d=)   
+    VALUE=$(echo $ARGUMENT | cut -f2- -d=)
 	declare $KEY="$VALUE"
 done
 
@@ -54,7 +59,7 @@ fi;
 
 for URL in `echo "$LIST" | sort`; do
 	# TMP_FILE=`mktemp "${TMPDIR}pdf.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
-	
+
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
 		echo "URL: $URL"
@@ -62,7 +67,7 @@ for URL in `echo "$LIST" | sort`; do
 
     # for more options, see the manual
 	CMD="(mkdir -p \"${DIR}\" && youtube-dl -f \"bestaudio[ext=m4a]/bestaudio[ext=ogg]/bestaudio[ext=mp3]/bestaudio\" --sleep-interval=${SLEEP_BETWEEN_REQUESTS} --rate-limit=${SPEED_LIMIT_KB}k -c --extract-audio \"${URL}\" --output=\"${DIR}/%(playlist_index)s - %(title)s.%(ext)s\";)"
-	
+
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
 	fi;
