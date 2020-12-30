@@ -3,6 +3,12 @@
 # @requires
 # imagemagik/convert
 
+# if installed via pip, update is done like this:
+# 	pip install -U youtube-dl
+# to check if installed via pip, do this:
+# 	pip list | grep youtube-dl
+
+
 # usage:
 # 	video.download.youtube.sh URL='https://www.youtube.com/watch?v=T5OkKPrcvT0'
 
