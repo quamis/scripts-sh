@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# use as:
+#     ./merge.auto.sh D1='/home/lucian/Downloads/Takeout/Google Photos' D2='/media/BIG/pictures/telefon, backups/google-takeout-quamis' RUN_MODE=safe
+
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
@@ -62,7 +65,7 @@ custom_rm () {
         mv "$D1FILE" "$TRASH";
 
     elif [ "$RUN_MODE" = "unsafe" ]; then
-        rm -f "$D1FILE"; 
+        rm -f "$D1FILE";
     else
         printf "\n invalid RUN_MODE";
         exit;
@@ -121,7 +124,7 @@ custom_mv () {
     printf "\n\n\n";
     printf "\n${YELLOW}======================================================${NC}\n";
     printf "\nstarted at: %s" "`date "+%Y-%m-%d %H:%M:%S"`";
-    
+
     if [ "$RUN_MODE" = "dry-run" ]; then
         printf "\nRUN_MODE:   ${YELLOW}%s${NC}" "$RUN_MODE";
 
@@ -135,7 +138,7 @@ custom_mv () {
         printf "\n ... wait 15 seconds, in case you change your mind";
         sleep 15;
     fi;
-    
+
     # build the list of image and movies, ignoring json files
     rebuildImageList;
 
@@ -159,7 +162,7 @@ custom_mv () {
     #comm --output-delimiter=""  -13 "$TMP11" "$TMP21"
 
     # new files, only in D1. These should get copied over to D2
-    #comm --output-delimiter=""  -23 "$TMP11" "$TMP21" 
+    #comm --output-delimiter=""  -23 "$TMP11" "$TMP21"
     printf "\n${YELLOW}======================================================${NC}\n";
 
 
@@ -199,7 +202,7 @@ custom_mv () {
         COUNT=$(( $COUNT + 1 ));
         D1FILE="$D1/$F";
         D2FILE="$D2/$F";
-        
+
         D2DIR=`dirname "$D2FILE"`;
         if [ ! -d "$D2DIR" ]; then
             custom_mkdir "$D2DIR"
@@ -224,7 +227,7 @@ custom_mv () {
     for F in `cat "$TMP3"`; do
         D1FILE="$D1/$F";
         D2FILE="$D2/$F";
-        
+
         D2DIR=`dirname "$D2FILE"`;
         if [ ! -d "$D2DIR" ]; then
             custom_mkdir "$D2DIR";
@@ -262,7 +265,7 @@ custom_mv () {
         COUNT=$(( $COUNT + 1 ));
         D1FILE="$D1/$F";
         D2FILE="$D2/$F";
-        
+
         D2DIR=`dirname "$D2FILE"`;
         if [ ! -d "$D2DIR" ]; then
             custom_mkdir "$D2DIR";
