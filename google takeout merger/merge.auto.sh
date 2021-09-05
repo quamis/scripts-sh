@@ -2,7 +2,7 @@
 
 # use as:
 #      tar -xzvf ./1.tgz && tar -xzvf ./2.tgz
-#     ./merge.auto.sh D1='/home/lucian/Downloads/Takeout/Google Photos' D2='/media/BIG/pictures/telefon, backups/google-takeout-quamis' RUN_MODE=safe
+#     ./merge.auto.sh D1='/media/lucian/BIG2T/tmp/Takeout/Google Photos' D2='/media/lucian/BIG2T/picturesFromPhone/google-takeout-quamis' RUN_MODE=safe
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
