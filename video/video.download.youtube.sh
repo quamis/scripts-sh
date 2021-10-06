@@ -33,6 +33,8 @@ done
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
 : ${VERBOSE:="0"};	# 0, 1
 
+: ${IGNORE_ERRORS:="no"};
+
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
@@ -68,7 +70,11 @@ for URL in `echo "$LIST" | sort`; do
 	fi;
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && youtube-dl --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+	if [[ "$IGNORE_ERRORS" == "yes" ]]; then
+		CMD="(mkdir -p \"${DIR}\" && youtube-dl --ignore-errors --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+	else
+		CMD="(mkdir -p \"${DIR}\" && youtube-dl                 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+	fi;
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
