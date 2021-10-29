@@ -14,10 +14,20 @@ done
 
 : ${FILE:=""};
 EXT=${FILE##*.};
+: ${FMT:="$EXT"};
 : ${OUTPUT:="${FILE%.*}-autocropped.${EXT}"};
 : ${AUTOCROP:="yes"};
+: ${PRECONVERT:="no"};
+: ${CLEANUP:="no"};
 
-CROPREGION=`ffmpeg -i "$FILE" -ss 2 -t 1 -vf cropdetect -f null - 2>&1 | awk '/crop/ { print $NF }' | tail -1`;
+REALFILE="$FILE";
+
+if [[ "$PRECONVERT" == "yes" ]]; then
+	ffmpeg -i "$FILE" -c:a copy "${FILE%.*}.tmp.${EXT}";
+	FILE="${FILE%.*}.tmp.${EXT}";
+fi;
+
+CROPREGION=`ffmpeg -i "${FILE}" -ss 2 -t 1 -vf cropdetect -f null - 2>&1 | awk '/crop/ { print $NF }' | tail -1`;
 
 echo "CROP REGION: $CROPREGION"
 if [[ "$AUTOCROP" == "yes" ]]; then
@@ -25,3 +35,8 @@ if [[ "$AUTOCROP" == "yes" ]]; then
 	ffmpeg -i "$FILE" -c:a copy -c:v libx264 -preset slow -crf 28 -vf "$CROPREGION" "$OUTPUT";
 fi;
 
+if [[ "$CLEANUP" == "yes" ]]; then
+	if [[ "$PRECONVERT" == "yes" ]]; then
+		rm "$FILE";
+	fi;
+fi;
