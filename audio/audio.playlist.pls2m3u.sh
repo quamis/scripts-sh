@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# convert all .pls files with this:
+#   for F in *.pls; do audio.playlist.pls2m3u.sh FILE="$F"; done;
+#   rm *.old
+
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do

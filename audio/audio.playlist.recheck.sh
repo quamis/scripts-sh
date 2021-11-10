@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# re-check all .m3u files with this (overrites input file!!!!:
+#   for F in *.m3u; do audio.playlist.recheck.sh FILE="$F" OUTPUT="$F";  done;
+
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
@@ -28,7 +31,7 @@ SAVEIFS=$IFS
 IFS=$'\n'
 cp "$FILE" "$TMP";
 dos2unix "$TMP";
-echo "" > "$OUTPUT";
+echo -n "" > "$OUTPUT";
 for F in `cat "$TMP"`; do
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
