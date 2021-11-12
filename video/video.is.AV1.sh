@@ -13,7 +13,7 @@ done
 
 : ${FILE:=""};
 
-MATCHED=`ffprobe "$FILE" 2>&1 | egrep 'Stream.+Video: av1 '"`;
+MATCHED=`ffprobe "$FILE" 2>&1 | egrep 'Stream.+Video: av1 '`;
 
 if [ -z "$MATCHED" ]; then
     exit 0;
