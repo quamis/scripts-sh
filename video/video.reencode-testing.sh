@@ -23,4 +23,4 @@ REALFILE="$FILE";
 
 # ffmpeg -i "$FILE" -c:a copy "${OUTPUT}";
 # ffmpeg -y -i "$FILE" -c:v libx264 -b:v $BPS -pass 1 -an -f null /dev/null && ffmpeg -i "$FILE" -c:v libx264 -b:v $BPS -pass 2 -c:a copy "${OUTPUT}";
-ffmpeg -i "$FILE" -c:v libx264 -preset slow -tune animation -crf 32 -c:a copy "${OUTPUT}";
+ffmpeg -i "$FILE" -c:v libx264 -preset slow -tune animation -crf 27 -c:a copy "${OUTPUT}";

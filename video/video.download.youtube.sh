@@ -71,9 +71,9 @@ for URL in `echo "$LIST" | sort`; do
 
     # for more options, see the manual
 	if [[ "$IGNORE_ERRORS" == "yes" ]]; then
-		CMD="(mkdir -p \"${DIR}\" && youtube-dl --ignore-errors --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+		CMD="(mkdir -p \"${DIR}\" && youtube-dl --ignore-errors --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --output '%(playlist)s/%(playlist_index)s- %(title)s.%(ext)s' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
 	else
-		CMD="(mkdir -p \"${DIR}\" && youtube-dl                 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+		CMD="(mkdir -p \"${DIR}\" && youtube-dl                 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --output '%(playlist)s/%(playlist_index)s- %(title)s.%(ext)s' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
 	fi;
 
 	if [ "$VERBOSE" = "1" ]; then
