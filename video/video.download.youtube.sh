@@ -35,6 +35,8 @@ done
 
 : ${IGNORE_ERRORS:="no"};
 
+: ${REORGANISE:="no"};
+
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
@@ -70,11 +72,17 @@ for URL in `echo "$LIST" | sort`; do
 	fi;
 
     # for more options, see the manual
+	C1="";
 	if [[ "$IGNORE_ERRORS" == "yes" ]]; then
-		CMD="(mkdir -p \"${DIR}\" && youtube-dl --ignore-errors --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-	else
-		CMD="(mkdir -p \"${DIR}\" && youtube-dl                 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+		C1="--ignore-errors";
 	fi;
+
+	C2="";
+	if [[ "$REORGANISE" == "playlist" ]]; then
+		C2="--output '%(playlist)s/%(playlist_index)s- %(title)s.%(ext)s' ";
+	fi;
+
+	CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";

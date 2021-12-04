@@ -10,7 +10,7 @@
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
-    VALUE=$(echo $ARGUMENT | cut -f2- -d=)   
+    VALUE=$(echo $ARGUMENT | cut -f2- -d=)
 	declare $KEY="$VALUE"
 done
 
@@ -26,6 +26,7 @@ done
 : ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
+: ${BACKGROUND:="white"};
 
 
 # clear the command list
@@ -50,9 +51,9 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	FILE_NAME="${FILE_NAME%.*}"
 	FILE_NAME_WITH_EXT="${FILE_DIR_AND_NAME_AND_EXT##*/}"
 	FILE_DIR="${FILE_DIR_AND_NAME_AND_EXT%/*}/"
-	
+
 	# TMP_FILE=`mktemp "${TMPDIR}pdf.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
-	
+
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
 		echo "FILE::$FILE_DIR_AND_NAME_AND_EXT"
@@ -63,8 +64,16 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	fi;
 
     # for PNG quality encoding, see https://stackoverflow.com/questions/9710118/convert-multipage-pdf-to-png-and-back-linux/12046542#12046542
-	CMD="(mkdir -p \"${FILE_NAME}\" && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}-%03d.png\")"
-	
+	C1=""
+	if [ "$BACKGROUND" == "white" ]; then
+		C1="-alpha remove -background \"#ffffff\"";
+	fi;
+	if [ "$BACKGROUND" == "black" ]; then
+		C1="-alpha remove -background \"#000000\"";
+	fi;
+
+	CMD="(mkdir -p \"${FILE_NAME}\" && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} $C1 \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}-%03d.png\")"
+
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
 	fi;
