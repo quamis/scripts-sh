@@ -29,7 +29,7 @@ done
 : ${SPEED_LIMIT_KB:="512"};
 : ${SLEEP_BETWEEN_REQUESTS:="2"};
 
-: ${TMPDIR:="/tmp/"};
+: ${TMPDIR:="/tmp/"};	# default to /tmp
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
 : ${VERBOSE:="0"};	# 0, 1
 
