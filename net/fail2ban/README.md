@@ -58,3 +58,8 @@ You might test a filter by running:
 ```bash
 fail2ban-regex --print-all-matched /var/log/apache2/access.log /etc/fail2ban/filter.d/apache-qmonitor2.conf /etc/fail2ban/filter.d/apache-qmonitor2.conf
 ```
+
+Unban an IP by running this:
+```bash
+fail2ban-client set apache-qmonitor2 unbanip 192.168.1.1
+```
