@@ -17,7 +17,7 @@ done
 : ${DIR:="./"};
 : ${EXT:="pdf"};
 : ${QUALITY:="90"};
-: ${DENSITY:="90"};
+: ${DENSITY:="150"};
 : ${RECURSE:="0"};
 : ${TMPDIR:="/tmp/"};
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
