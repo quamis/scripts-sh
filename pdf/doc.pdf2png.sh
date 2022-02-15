@@ -17,7 +17,7 @@ done
 : ${DIR:="./"};
 : ${EXT:="pdf"};
 : ${QUALITY:="90"};
-: ${DENSITY:="150"};
+: ${DENSITY:="200"};	# 150 is "good enough" for most cases, 200 is "better", 300 is "best", 600 is "extremely best"
 : ${RECURSE:="0"};
 : ${TMPDIR:="/tmp/"};
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
