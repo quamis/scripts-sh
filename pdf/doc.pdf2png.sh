@@ -72,7 +72,7 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 		C1="-alpha remove -background \"#000000\"";
 	fi;
 
-	CMD="(mkdir -p \"${FILE_NAME}\" && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} $C1 \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}-%03d.png\")"
+	CMD="(mkdir -p \"${FILE_DIR}/${FILE_NAME}\" && convert -density ${DENSITY} \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} $C1 \"${FILE_DIR}${FILE_NAME}/${FILE_NAME}-%03d.png\")"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
