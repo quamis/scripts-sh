@@ -24,6 +24,7 @@ done
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
 : ${VERBOSE:="0"};	# 0, 1
 : ${METHOD:="pngquant"};	# 0, 1
+: ${OVERWRITE:="0"};	# 0, 1
 
 : ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
@@ -64,13 +65,45 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	fi;
 
 	if [ "$METHOD" = "pngquant" ]; then
-		CMD="(pngquant --speed 1 --strip \"${FILE_DIR_AND_NAME_AND_EXT}\" --output \"${FILE_DIR}${FILE_NAME}.reenc.png\")";
+		CMD1="";
+		CMD2="";
+		if [ "$OVERWRITE" = "1" ]; then
+			CMD="(${CMD1}pngquant --speed 1 --strip -f --ext .png \"${FILE_DIR_AND_NAME_AND_EXT}\"${CMD2})";
+		else
+			OUTPUT="${FILE_DIR}${FILE_NAME}.reenc.png";
+			CMD="(${CMD1}pngquant --speed 1 --strip \"${FILE_DIR_AND_NAME_AND_EXT}\" --output \"${OUTPUT}\"${CMD2})";
+		fi;
+
 	elif [ "$METHOD" = "pngcrush" ]; then
-		CMD="(pngcrush \"${FILE_DIR_AND_NAME_AND_EXT}\" \"${FILE_DIR}${FILE_NAME}.jpg\")";
+		CMD1="";
+		CMD2="";
+		OUTPUT="${FILE_DIR}${FILE_NAME}.reenc.png";
+		if [ "$OVERWRITE" = "1" ]; then
+			CMD1="mv \"${FILE_DIR_AND_NAME_AND_EXT}\" \"${TMPDIR}${FILE_NAME_WITH_EXT}\" && ";
+			CMD2=" && rm \"${FILE_DIR_AND_NAME_AND_EXT}\"";
+			FILE_DIR_AND_NAME_AND_EXT="${TMPDIR}${FILE_NAME_WITH_EXT}";
+			OUTPUT="${FILE_DIR}${FILE_NAME}.png";
+
+			CMD="(${CMD1}pngcrush \"${FILE_DIR_AND_NAME_AND_EXT}\" \"${FILE_DIR}${FILE_NAME}.jpg\"${CMD2})";
+		else
+			CMD="(${CMD1}pngcrush \"${FILE_DIR_AND_NAME_AND_EXT}\" --output \"${OUTPUT}\"${CMD2})";
+		fi;
+
 	elif [ "$METHOD" = "jpg" ]; then
+		CMD1="";
+		CMD2="";
+		OUTPUT="${FILE_DIR}${FILE_NAME}.reenc.png";
+		if [ "$OVERWRITE" = "1" ]; then
+			CMD1="mv \"${FILE_DIR_AND_NAME_AND_EXT}\" \"${TMPDIR}${FILE_NAME_WITH_EXT}\" && ";
+			FILE_DIR_AND_NAME_AND_EXT="${TMPDIR}${FILE_NAME_WITH_EXT}";
+			OUTPUT="${FILE_DIR}${FILE_NAME}.png";
+			CMD2=" && rm \"${FILE_DIR_AND_NAME_AND_EXT}\"";
+		fi;
+
 		C1="-alpha remove -background \"#ffffff\"";
 		C2="-fuzz 5% -trim +repage"; # autocrop page
-		CMD="(convert \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} $C1 $C2 \"${FILE_DIR}${FILE_NAME}.jpg\")";
+
+		CMD="(${CMD1}convert \"${FILE_DIR_AND_NAME_AND_EXT}\" -quality ${QUALITY} $C1 $C2 \"${FILE_DIR}${FILE_NAME}.jpg\"${CMD2})";
 	else
 		echo "ERROR: unknown method: $METHOD";
 		exit 1;
