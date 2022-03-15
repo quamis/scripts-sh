@@ -24,7 +24,7 @@ done
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
 : ${VERBOSE:="0"};	# 0, 1
 : ${METHOD:="pngquant"};	# 0, 1
-: ${OVERWRITE:="0"};	# 0, 1
+: ${OVERWRITE:="1"};	# 0, 1
 
 : ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
