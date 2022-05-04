@@ -15,22 +15,26 @@ for ARGUMENT in "$@"; do
 	declare $KEY="$VALUE"
 done
 
-: ${DIR:="./"};
-: ${FMT:="mkv"};
-: ${OUTPUT:="video.${FMT}"};
+: ${FILE:=""};
+EXT=${FILE##*.};
+: ${FMT:="$EXT"};
+: ${OUTPUT:="${FILE%.*}-reenc.${EXT}"};
+: ${CLEANUP:="no"};
+: ${BPS:="350k"};
 : ${PRESET:="libx264,27"};
-: ${PREVIEW:="no"};
 
-CONCATENATED_FILENAMES=`ls $DIR/*.VOB | sort | tr "\n" "|"`;
+REALFILE="$FILE";
 
-# ffmepg params @https://trac.ffmpeg.org/wiki/Encode/H.264
-#   Possible presets: ultrafast superfast veryfast faster fast medium slow slower veryslow placebo
-#   Possible tunes: film animation grain stillimage psnr ssim fastdecode zerolatency
+echo "`pwd`---$REALFILE";
+
+# ffmpeg -i "$FILE" -c:a copy "${OUTPUT}";
+# ffmpeg -y -i "$FILE" -c:v libx264 -b:v $BPS -pass 1 -an -f null /dev/null && ffmpeg -i "$FILE" -c:v libx264 -b:v $BPS -pass 2 -c:a copy "${OUTPUT}";
 
 FFMPEG_CRF=51;
 FFMPEG_PRESET="slow";
-FFMPEG_AUDIO_CODEC="aac";  # ac3, aac, mp3, copy
+FFMPEG_AUDIO_CODEC="copy";  # ac3, aac, mp3, copy
 FFMPEG_EXTRA_PARAM1="";
+FFMPEG_EXIT_CODE="-1";
 
 if [[ "$PRESET" == "libx264,20" ]]; then
     FFMPEG_CRF=20;
@@ -48,8 +52,16 @@ fi;
 if [[ "$PREVIEW" == "yes" ]]; then
     FFMPEG_PRESET="ultrafast";
     FFMPEG_AUDIO_CODEC="copy";
-    FFMPEG_EXTRA_PARAM1="-ss 00:12:00 -t 00:02:30";
+    FFMPEG_EXTRA_PARAM1="-ss 00:00:30 -t 00:02:30";
 fi;
 
-ffmpeg -i "concat:${CONCATENATED_FILENAMES}" $FFMPEG_EXTRA_PARAM1 -c:v libx264 -preset $FFMPEG_PRESET -tune film -crf $FFMPEG_CRF -c:a $FFMPEG_AUDIO_CODEC "${OUTPUT}";
 
+ffmpeg -i "${FILE}" $FFMPEG_EXTRA_PARAM1 -c:v libx264 -preset $FFMPEG_PRESET -crf $FFMPEG_CRF -c:a $FFMPEG_AUDIO_CODEC "${OUTPUT}";
+FFMPEG_EXIT_CODE=$?;
+
+if [[ "$FFMPEG_EXIT_CODE" == "0" ]]; then
+    if [[ "$CLEANUP" == "yes" ]]; then
+        rm "$FILE";
+        mv "${OUTPUT}" "$FILE";
+    fi;
+fi;
