@@ -9,6 +9,5 @@ COLUMNS+=(`./smb.connections.sh`);
 COLUMNS+=(`./cpu.temp.sh`);
 COLUMNS+=(`./disk.temp.sh`);
 
-for value in "${COLUMNS[@]}"; do
-    echo $value;
-done;
+OUT="./monitor.csv";
+echo ${COLUMNS[@]} | tr " " "," >> $OUT;
