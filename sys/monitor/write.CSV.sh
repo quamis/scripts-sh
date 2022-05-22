@@ -2,7 +2,7 @@
 
 COLUMNS=( )
 
-COLUMNS+=(`date -Iseconds`)
+COLUMNS+=(`date -Iseconds`);
 COLUMNS+=(`./loadAvg.sh`);
 COLUMNS+=(`./apache.connections.sh`);
 COLUMNS+=(`./smb.connections.sh`);
