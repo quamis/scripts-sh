@@ -2,6 +2,10 @@
 
 DIR=`dirname $0`;
 
+# put this in crontab
+# You will need to run this as root
+#   */5 * * * * cd "/var/www/html/dev/monitor/" && /home/pi/dev/scripts-sh/sys/monitor/write.CSV.sh
+
 
 HEADERS=( )
 COLUMNS=( )
