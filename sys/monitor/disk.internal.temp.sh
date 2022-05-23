@@ -2,4 +2,4 @@
 
 DEV="$1";
 # hddtemp /dev/$DEV | sed -r "s/\\/dev\\/.+:.+: //" | sed "s/°C//";
-hddtemp /dev/$DEV --numeric;
+/usr/sbin/hddtemp /dev/$DEV --numeric;
