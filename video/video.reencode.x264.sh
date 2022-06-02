@@ -41,6 +41,8 @@ elif [[ "$PRESET" == "libx264,20" ]]; then
     FFMPEG_CRF=20;
 elif [[ "$PRESET" == "libx264,23" ]]; then
     FFMPEG_CRF=23;
+elif [[ "$PRESET" == "libx264,25" ]]; then
+    FFMPEG_CRF=25;
 elif [[ "$PRESET" == "libx264,27" ]]; then
     FFMPEG_CRF=27;
 elif [[ "$PRESET" == "libx264,34" ]]; then
