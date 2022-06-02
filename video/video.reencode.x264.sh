@@ -35,8 +35,12 @@ FFMPEG_AUDIO_CODEC="copy";  # ac3, aac, mp3, copy
 FFMPEG_EXTRA_PARAM1="";
 FFMPEG_EXIT_CODE="-1";
 
-if [[ "$PRESET" == "libx264,20" ]]; then
+if [[ "$PRESET" == "libx264,13" ]]; then
+    FFMPEG_CRF=13;
+elif [[ "$PRESET" == "libx264,20" ]]; then
     FFMPEG_CRF=20;
+elif [[ "$PRESET" == "libx264,23" ]]; then
+    FFMPEG_CRF=23;
 elif [[ "$PRESET" == "libx264,27" ]]; then
     FFMPEG_CRF=27;
 elif [[ "$PRESET" == "libx264,34" ]]; then
