@@ -20,12 +20,11 @@ EXT=${FILE##*.};
 : ${FMT:="$EXT"};
 : ${OUTPUT:="${FILE%.*}-reenc.${EXT}"};
 : ${CLEANUP:="no"};
+: ${RESCALE:="yes"};
 : ${BPS:="350k"};
 : ${PRESET:="libx264,27"};
 
 REALFILE="$FILE";
-
-echo "`pwd`---$REALFILE";
 
 # ffmpeg -i "$FILE" -c:a copy "${OUTPUT}";
 # ffmpeg -y -i "$FILE" -c:v libx264 -b:v $BPS -pass 1 -an -f null /dev/null && ffmpeg -i "$FILE" -c:v libx264 -b:v $BPS -pass 2 -c:a copy "${OUTPUT}";
@@ -49,14 +48,18 @@ else
     exit 1;
 fi;
 
+
 if [[ "$PREVIEW" == "yes" ]]; then
     FFMPEG_PRESET="ultrafast";
     FFMPEG_AUDIO_CODEC="copy";
     FFMPEG_EXTRA_PARAM1="-ss 00:00:30 -t 00:02:30";
 fi;
 
+if [[ "$RESCALE" == "yes" ]]; then
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf \"scale='max(960,iw*0.75)':-2\"";
+fi;
 
-ffmpeg -i "${FILE}" $FFMPEG_EXTRA_PARAM1 -c:v libx264 -preset $FFMPEG_PRESET -crf $FFMPEG_CRF -c:a $FFMPEG_AUDIO_CODEC "${OUTPUT}";
+ffmpeg -i "$FILE" $FFMPEG_EXTRA_PARAM1 -c:v libx264 -preset $FFMPEG_PRESET -crf $FFMPEG_CRF -c:a $FFMPEG_AUDIO_CODEC "$OUTPUT";
 FFMPEG_EXIT_CODE=$?;
 
 if [[ "$FFMPEG_EXIT_CODE" == "0" ]]; then
