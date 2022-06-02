@@ -56,7 +56,7 @@ if [[ "$PREVIEW" == "yes" ]]; then
 fi;
 
 if [[ "$RESCALE" == "yes" ]]; then
-    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf \"scale='max(960,iw*0.75)':-2\"";
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(960,iw*0.75)':-2";
 fi;
 
 ffmpeg -i "$FILE" $FFMPEG_EXTRA_PARAM1 -c:v libx264 -preset $FFMPEG_PRESET -crf $FFMPEG_CRF -c:a $FFMPEG_AUDIO_CODEC "$OUTPUT";
