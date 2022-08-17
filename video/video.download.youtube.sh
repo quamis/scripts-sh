@@ -86,7 +86,6 @@ for URL in `echo "$LIST" | sort`; do
 
 	if [[ "$SPLIT_PLAYLIST" == "yes" ]]; then
 		PREV_LIMIT=0;
-		CMD="";
 		for LIMIT in 100 200 300 400 500 600 700 800 900 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 3200 3400 3600 3800 4000 4500 5000 5500 6000 6500 7000 7500 8000 9000 "max"; do
 			PREV_LIMIT=$(( PREV_LIMIT + 1));
 			if [[ "$LIMIT" == "max" ]]; then
@@ -95,11 +94,9 @@ for URL in `echo "$LIST" | sort`; do
 				C3="--playlist-start ${PREV_LIMIT} --playlist-end ${LIMIT} ";
 			fi;
 
-			if [[ "$CMD" == "" ]]; then
-				CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 $C3 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-			else
-				CMD="${CMD}; (mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 $C3 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-			fi;
+			CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 $C3 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+			echo "$CMD" >> "$COMMANDFILE";
+			CMD="";
 
 			PREV_LIMIT=$LIMIT;
 		done;
