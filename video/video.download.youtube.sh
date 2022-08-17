@@ -95,6 +95,11 @@ for URL in `echo "$LIST" | sort`; do
 			fi;
 
 			CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 $C3 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+
+			if [ "$VERBOSE" = "1" ]; then
+				echo "$CMD";
+			fi;
+
 			echo "$CMD" >> "$COMMANDFILE";
 			CMD="";
 
@@ -102,14 +107,13 @@ for URL in `echo "$LIST" | sort`; do
 		done;
 	else
 		CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-	fi;
+		if [ "$VERBOSE" = "1" ]; then
+			echo "$CMD";
+		fi;
 
-	if [ "$VERBOSE" = "1" ]; then
-		echo "$CMD";
+		# append to the command list
+		echo "$CMD" >> "$COMMANDFILE";
 	fi;
-
-	# append to the command list
-	echo "$CMD" >> "$COMMANDFILE";
 done;
 IFS=$SAVEIFS
 
