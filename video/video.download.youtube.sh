@@ -7,6 +7,8 @@
 # 	pip install -U youtube-dl
 # to check if installed via pip, do this:
 # 	pip list | grep youtube-dl
+# to install yt-dlp:
+#	python3 -m pip install -U yt-dlp
 
 
 # usage:
@@ -32,6 +34,7 @@ done
 : ${TMPDIR:="/tmp/"};	# default to /tmp
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
 : ${VERBOSE:="0"};	# 0, 1
+: ${DOWNLOAD_SUBS:="no"};
 
 : ${IGNORE_ERRORS:="no"};
 
@@ -42,6 +45,9 @@ done
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
+
+: ${DOWNLOADER:="youtube-dl"};	# youtube-dl, yt-dlp
+
 
 
 # clear the command list
@@ -84,6 +90,11 @@ for URL in `echo "$LIST" | sort`; do
 		C2="--output '%(playlist)s/%(playlist_index)s- %(title)s.%(ext)s' ";
 	fi;
 
+
+	if [[ "$DOWNLOAD_SUBS" == "yes" ]]; then
+		C1="$C1 --write-sub --write-auto-sub --sub-lang ro,en --sub-format srt --convert-subs srt ";
+	fi;
+
 	if [[ "$SPLIT_PLAYLIST" == "yes" ]]; then
 		PREV_LIMIT=0;
 		for LIMIT in 2 4 6 8 10 20 30 40 50 60 70 80 90 100 200 300 400 500 600 700 800 900 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 3200 3400 3600 3800 4000 4500 5000 5500 6000 6500 7000 7500 8000 9000 "max"; do
@@ -106,7 +117,7 @@ for URL in `echo "$LIST" | sort`; do
 			PREV_LIMIT=$LIMIT;
 		done;
 	else
-		CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+		CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720]+bestaudio/bestvideo+bestaudio' $C2 --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
 		if [ "$VERBOSE" = "1" ]; then
 			echo "$CMD";
 		fi;
