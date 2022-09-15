@@ -24,7 +24,7 @@ done
 : ${URL:=""};
 
 : ${DIR:="./"};
-: ${SPEED_LIMIT_KB:="128"};
+: ${SPEED_LIMIT_KB:="512"};
 : ${SLEEP_BETWEEN_REQUESTS:="2"};
 
 : ${TMPDIR:="/tmp/"};
@@ -34,6 +34,9 @@ done
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
+
+: ${DOWNLOADER:="youtube-dl"};	# youtube-dl, yt-dlp
+
 
 
 # clear the command list
@@ -66,7 +69,7 @@ for URL in `echo "$LIST" | sort`; do
 	fi;
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && youtube-dl -f \"bestaudio[ext=m4a]/bestaudio[ext=ogg]/bestaudio[ext=mp3]/bestaudio\" --sleep-interval=${SLEEP_BETWEEN_REQUESTS} --rate-limit=${SPEED_LIMIT_KB}k -c --extract-audio \"${URL}\" --output=\"${DIR}/%(playlist_index)s - %(title)s.%(ext)s\";)"
+	CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER -f \"bestaudio[ext=m4a]/bestaudio[ext=ogg]/bestaudio[ext=mp3]/bestaudio\" --sleep-interval=${SLEEP_BETWEEN_REQUESTS} --rate-limit=${SPEED_LIMIT_KB}k -c --extract-audio \"${URL}\" --output=\"${DIR}/%(playlist_index)s - %(title)s.%(ext)s\";)"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
