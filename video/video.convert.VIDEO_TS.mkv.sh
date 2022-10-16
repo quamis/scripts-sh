@@ -42,7 +42,7 @@ elif [[ "$PRESET" == "libx264,27" ]]; then
     FFMPEG_CRF=27;
 elif [[ "$PRESET" == "libx264,34" ]]; then
     FFMPEG_CRF=34;
-elif [[ "$PRESET" == "libx264,50" ]]; then
+elif [[ "$PRESET" == "libx264,50" ]]; then  # lowest quality
     FFMPEG_CRF=50;
 else
     echo "Unkown preset: ${PRESET}";
