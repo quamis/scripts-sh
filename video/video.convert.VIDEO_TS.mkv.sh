@@ -38,6 +38,8 @@ FFMPEG_EXTRA_PARAM1="";
 
 if [[ "$PRESET" == "libx264,20" ]]; then
     FFMPEG_CRF=20;
+elif [[ "$PRESET" == "libx264,24" ]]; then
+    FFMPEG_CRF=24;
 elif [[ "$PRESET" == "libx264,27" ]]; then
     FFMPEG_CRF=27;
 elif [[ "$PRESET" == "libx264,34" ]]; then
