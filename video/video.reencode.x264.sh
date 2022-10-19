@@ -61,7 +61,9 @@ if [[ "$PREVIEW" == "yes" ]]; then
     FFMPEG_EXTRA_PARAM1="-ss 00:00:30 -t 00:02:30";
 fi;
 
-if [[ "$RESCALE" == "800" ]]; then
+if [[ "$RESCALE" == "720" ]]; then
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(720,iw*0.75)':-2";
+elif [[ "$RESCALE" == "800" ]]; then
     FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(800,iw*0.75)':-2";
 elif [[ "$RESCALE" == "960" ]]; then
     FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(960,iw*0.75)':-2";

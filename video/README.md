@@ -17,3 +17,11 @@
 #   find . -type f -exec bash -c "video.reencode.x264.sh FILE='{}';" \;
 # re-encode ALL files, hi-quality:
 #   find . -type f -exec bash -c "video.reencode.x264.sh PRESET='libx264,20' FILE='{}';" \;
+
+# re-encode ALL files, low-quality:
+#   find . -type f -exec bash -c "video.reencode.x264.sh PRESET='libx264,34' FILE='{}';" \;
+# re-encode ALL files, re-scale:
+#   find . -type f -exec bash -c "video.reencode.x264.sh RESCALE=720 FILE='{}';" \;
+
+# re-encode ALL files, remove old ones:
+#   find . -type f -exec bash -c "video.reencode.x264.sh CLEANUP=yes FILE='{}';" \;
