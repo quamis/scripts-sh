@@ -3,7 +3,7 @@
 # 	video.autoCrop.sh FILE='xyz.mkv'
 
 # list all AV1 files in a folder with this:
-#   CMD='video.is.AV1.sh FILE="$1" && echo "$1"';
+#   CMD='video.is.AV1.sh FILE="$1" && echo "AV1: $1" || echo "---: $1"';
 #   find . -type f -exec bash -c "$CMD" -- {} \;
 
 
