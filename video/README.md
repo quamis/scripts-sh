@@ -27,3 +27,6 @@
 
 # re-encode ALL files, remove old ones:
 #   find . -type f -exec bash -c "video.reencode.x264.sh CLEANUP=yes FILE='{}';" \;
+
+# re-encode, 200Mb episode to 60Mb:
+#   find . -type f -exec bash -c "video.reencode.x264.sh CLEANUP=yes RESCALE=720 PRESET='libx264,25' FILE='{}';" \;
