@@ -61,16 +61,16 @@ if [[ "$PREVIEW" == "yes" ]]; then
     FFMPEG_EXTRA_PARAM1="-ss 00:00:30 -t 00:02:30";
 fi;
 
-if [[ "$RESCALE" == "720" ]]; then
+if [[ "$RESCALE" == "HD" ]]; then
     FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(720,iw*0.75)':-2";
-elif [[ "$RESCALE" == "800" ]]; then
-    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(800,iw*0.75)':-2";
-elif [[ "$RESCALE" == "960" ]]; then
-    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(960,iw*0.75)':-2";
-elif [[ "$RESCALE" == "1080" ]]; then
-    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(1080,iw*0.75)':-2";
-elif [[ "$RESCALE" == "1600" ]]; then
-    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max(1600,iw*0.75)':-2";
+elif [[ "$RESCALE" == "0.25" ]]; then
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='iw*0.25':-2";
+elif [[ "$RESCALE" == "0.50" ]]; then
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='iw*0.5':-2";
+elif [[ "$RESCALE" == "0.75" ]]; then
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='iw*0.75':-2";
+elif [[ "$RESCALE" == "640" || "$RESCALE" == "720" || "$RESCALE" == "800" || "$RESCALE" == "900" || "$RESCALE" == "960" || "$RESCALE" == "1080" || "$RESCALE" == "1440" || "$RESCALE" == "1600" ]]; then
+    FFMPEG_EXTRA_PARAM1="$FFMPEG_EXTRA_PARAM1 -vf scale='max($RESCALE,540)':-2";
 fi;
 
 ffmpeg -i "$FILE" $FFMPEG_EXTRA_PARAM1 -c:v libx264 -preset $FFMPEG_PRESET -crf $FFMPEG_CRF -c:a $FFMPEG_AUDIO_CODEC "$OUTPUT";
