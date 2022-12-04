@@ -37,6 +37,8 @@ FFMPEG_EXIT_CODE="-1";
 
 if [[ "$PRESET" == "libx264,13" ]]; then
     FFMPEG_CRF=13;
+elif [[ "$PRESET" == "libx264,16" ]]; then
+    FFMPEG_CRF=16;
 elif [[ "$PRESET" == "libx264,20" ]]; then
     FFMPEG_CRF=20;
 elif [[ "$PRESET" == "libx264,23" ]]; then
