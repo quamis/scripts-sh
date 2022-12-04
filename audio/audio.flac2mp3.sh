@@ -44,16 +44,16 @@ declare -A PRESET_MAP=( \
     ['mp3,8']='-acodec libmp3lame -b:a 80k ' \
     ['mp3,9']='-acodec libmp3lame -b:a 64k ' \
                                              \
-    ['mp4,0']='-acodec libfdk_aac -b:a 320k' \
-    ['mp4,1']='-acodec libfdk_aac -b:a 256k' \
-    ['mp4,2']='-acodec libfdk_aac -b:a 224k' \
-    ['mp4,3']='-acodec libfdk_aac -b:a 192k' \
-    ['mp4,4']='-acodec libfdk_aac -b:a 160k' \
-    ['mp4,5']='-acodec libfdk_aac -b:a 128k' \
-    ['mp4,6']='-acodec libfdk_aac -b:a 112k' \
-    ['mp4,7']='-acodec libfdk_aac -b:a 96k ' \
-    ['mp4,8']='-acodec libfdk_aac -b:a 80k ' \
-    ['mp4,9']='-acodec libfdk_aac -b:a 64k ' \
+    ['m4a,0']='-acodec libfdk_aac -b:a 320k' \
+    ['m4a,1']='-acodec libfdk_aac -b:a 256k' \
+    ['m4a,2']='-acodec libfdk_aac -b:a 224k' \
+    ['m4a,3']='-acodec libfdk_aac -b:a 192k' \
+    ['m4a,4']='-acodec libfdk_aac -b:a 160k' \
+    ['m4a,5']='-acodec libfdk_aac -b:a 128k' \
+    ['m4a,6']='-acodec libfdk_aac -b:a 112k' \
+    ['m4a,7']='-acodec libfdk_aac -b:a 96k ' \
+    ['m4a,8']='-acodec libfdk_aac -b:a 80k ' \
+    ['m4a,9']='-acodec libfdk_aac -b:a 64k ' \
 )
 
 # NOTE: for mp3, @see https://trac.ffmpeg.org/wiki/Encode/MP3
