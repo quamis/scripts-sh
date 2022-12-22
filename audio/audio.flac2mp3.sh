@@ -72,7 +72,7 @@ for FILE in `find "${DIR}/" -type f -print | egrep "\.(${regexpEXT})$" | sort`; 
 
     CMD="ffmpeg -loglevel panic -i \"${FILE_DIR_AND_NAME_AND_EXT}\" -vn -y ${PRESET_MAP[$PRESET]} \"${FILE_DIR}/${FILE_NAME}.${PRESET_EXT}\"";
     if [[ "$CLEANUP" == "yes" ]]; then
-        CMD="${CMD} && rm \"$F\"";
+        CMD="${CMD} && rm \"${FILE_DIR_AND_NAME_AND_EXT}\"";
     fi;
 
     if [ "$VERBOSE" = "1" ]; then
