@@ -1,10 +1,7 @@
 #!/bin/bash
 
 # usage:
-# 	video.autoCrop.sh FILE='xyz.mkv'
-
-# re-encode all AV1 files in a folder with this:
-#     find . -type f -exec bash -c "video.is.AV1.sh FILE='{}' && video.reencode.x264.sh CLEANUP=yes FILE='{}';" \;
+# 	audio.flac2mp3.sh EXT=flac,mp3 PRESET=m4a,3 RUN_MODE=parallel CLEANUP=yes
 
 
 # THIS ALLOWS INJECTING VARS into the local namespace
