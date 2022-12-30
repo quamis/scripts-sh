@@ -17,9 +17,9 @@ done
 
 : ${TMPDIR:="/tmp/"};
 : ${TRASH:="./trash/"};
-: ${LOG:="./log.log"};
-: ${LOG:="./log.log"};
 : ${RUN_MODE:="dry-run"};
+: ${LOG:="./log-${RUN_MODE}.log"};
+: ${LOGOLD:="./log-${RUN_MODE}.old.log"};
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -40,6 +40,7 @@ fi;
 TMP1=`mktemp --tmpdir="${TMPDIR}"`;
 TMP2=`mktemp --tmpdir="${TMPDIR}"`;
 TMP3=`mktemp --tmpdir="${TMPDIR}"`;
+TMP4=`mktemp --tmpdir="${TMPDIR}"`;
 TMP11=`mktemp --tmpdir="${TMPDIR}"`;
 TMP21=`mktemp --tmpdir="${TMPDIR}"`;
 
@@ -49,6 +50,10 @@ rebuildImageList () {
 
     cat "$TMP1" | cut -d$'\t' -f1 | sort > "$TMP11";
     cat "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP21";
+}
+
+extractLastLog () {
+    cat "$LOGOLD" | sed -e "s/\x1b\[.\{1,5\}m//g" | egrep -i "move: '.+'" | sed -r "s/[ \t]*move:[ \t]*'(.*)'/\1/g" > "$TMP4";
 }
 
 custom_rm () {
@@ -121,6 +126,13 @@ custom_mv () {
     fi;
 }
 
+# rotate logs
+if [ -f "$LOG" ]; then
+    mv "$LOGOLD" "$LOGOLD-`date "+%Y-%m-%d %H:%M:%S"`.log";
+    mv "$LOG" "$LOGOLD";
+fi
+
+
 {
     printf "\n\n\n";
     printf "\n${YELLOW}======================================================${NC}\n";
@@ -142,6 +154,9 @@ custom_mv () {
 
     # build the list of image and movies, ignoring json files
     rebuildImageList;
+
+    # build a log of the last copied files
+    extractLastLog;
 
     D1_FILES_COUNT=`cat "$TMP11" | wc -l`;
     D2_FILES_COUNT=`cat "$TMP21" | wc -l`;
@@ -175,7 +190,7 @@ custom_mv () {
         exit;
     fi;
 
-    # 1. delete identical files in D1
+    # 1.1. delete identical files in D1
     printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}delete identical files from D1, also in D2${NC}";
     comm --output-delimiter=""  -12 "$TMP1" "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP11";
@@ -184,6 +199,21 @@ custom_mv () {
     for F in `cat "$TMP11"`; do
         COUNT=$(( $COUNT + 1 ));
         D1FILE="$D1/$F";
+
+        custom_rm "$D1FILE";
+    done;
+    unset IFS;
+    printf "\n${YELLOW}%9d %s${NC}" $COUNT "files deleted";
+    printf "\n";
+
+    # 1.2. delete older files that were already moved
+    printf "\n${GREEN}======================================================${NC}\n";
+    printf "\n${GREEN}delete already moved files from D1, as reported in the last log${NC}";
+    COUNT=$(( 0 ));
+    IFS=$'\n';
+    for F in `cat "$TMP4"`; do
+        COUNT=$(( $COUNT + 1 ));
+        D1FILE="$F";
 
         custom_rm "$D1FILE";
     done;
@@ -281,6 +311,7 @@ custom_mv () {
     rm -f "$TMP1";
     rm -f "$TMP2";
     rm -f "$TMP3";
+    rm -f "$TMP4";
     rm -f "$TMP11";
     rm -f "$TMP21";
 
