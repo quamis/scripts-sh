@@ -66,7 +66,7 @@ for URL in `echo "$LIST" | sort`; do
 	if [ "$D" != "" ]; then
 		VIDEODATE=$( date --date="${D}" "+%Y-%m-%d %H:%M");
 	else
-		VIDEODATE="0000-00-00 00:00";
+		VIDEODATE="";
 	fi;
 
 	JSONVIDEOURL=`echo "${HTML}" | egrep -o "\"http[^\"]+mp4\"" | tail -n 1`;
@@ -90,9 +90,13 @@ for URL in `echo "$LIST" | sort`; do
 		echo "	title: $TITLE"
 	fi;
 
+	FILENAME="${VIDEODATE} - ${TITLE}";
+	if [ "${VIDEODATE}" = "" ]; then
+		FILENAME="${TITLE}";
+	fi;
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && wget --continue --limit-rate ${SPEED_LIMIT_KB}k -O \"${DIR}/${VIDEODATE} - ${TITLE}.mp4\" \"${VIDEOURL}\";)"
+	CMD="(mkdir -p \"${DIR}\" && wget --continue --limit-rate ${SPEED_LIMIT_KB}k -O \"${DIR}/${FILENAME}.mp4\" \"${VIDEOURL}\";)"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
