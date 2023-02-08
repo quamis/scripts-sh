@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # @requires
-# gs
+# apt-install gs pdftk
+
+
+# pdf.autoShrinkOneFile.sh FILE=tests/input.pdf
 
 # inspired by http://www.alfredklomp.com/programming/shrinkpdf, completly rewritten
 
@@ -9,7 +12,7 @@
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
-    VALUE=$(echo $ARGUMENT | cut -f2- -d=)   
+    VALUE=$(echo $ARGUMENT | cut -f2- -d=)
 	declare $KEY="$VALUE"
 done
 
@@ -19,11 +22,14 @@ done
 : ${TMPDIR:="/tmp/"};
 : ${VERBOSE:="0"};	# 0, 1
 : ${KEEP:="smallest"};
-#: ${METHODS:="shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk"};
+# : ${METHODS:="shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk"};
 : ${METHODS:="shrink_images_to_300dpi,shrink_ps2pdf_printer"};
+# : ${METHODS:="shrink_recompress_v10,shrink_recompress_v11,shrink_recompress_v15,shrink_recompress_v16,shrink_recompress_v17,shrink_recompress_v18,shrink_recompress_v30"};
+
+# : ${METHODS:=$((compgen -A function | grep shrink_ | tr "\n" ","))};
 
 
-shrink_images_with_gs () {
+local_shrink_images_with_gs () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 	local IMAGE_RESOLUTION="$3"
@@ -38,14 +44,28 @@ shrink_images_with_gs () {
 	  -dSubsetFonts=true							\
 	  -dAutoRotatePages=/None						\
 	  -dDownsampleColorImages=true					\
+	  -dDetectDuplicateImages=true					\
 	  -dColorImageDownsampleType=/Bicubic			\
 	  -dColorImageResolution=$IMAGE_RESOLUTION		\
 	  -dGrayImageDownsampleType=/Bicubic			\
 	  -dGrayImageResolution=$IMAGE_RESOLUTION		\
 	  -dMonoImageDownsampleType=/Subsample			\
 	  -dMonoImageResolution=$IMAGE_RESOLUTION		\
-	  -sOutputFile="$OUTPUT"							\
+	  -sOutputFile="$OUTPUT"						\
 	  "$INPUT"
+}
+
+
+local_shrink_with_gs () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+	local PARAMS="$3"
+
+	#@see https://stackoverflow.com/questions/10450120/optimize-pdf-files-with-ghostscript-or-other
+
+	CMD="gs -o \"$OUTPUT\" -q -dNOPAUSE -dBATCH -dSAFER -sDEVICE=pdfwrite $PARAMS -f \"$INPUT\""
+	# echo $CMD;
+	eval $CMD
 }
 
 
@@ -53,14 +73,14 @@ shrink_images_to_150dpi () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
-	shrink_images_with_gs "$INPUT" "$OUTPUT" "150"
+	local_shrink_images_with_gs "$INPUT" "$OUTPUT" "150"
 }
 
 shrink_images_to_300dpi () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
-	shrink_images_with_gs "$INPUT" "$OUTPUT" "300"
+	local_shrink_images_with_gs "$INPUT" "$OUTPUT" "300"
 }
 
 shrink_ps2pdf_printer () {
@@ -106,11 +126,61 @@ shrink_pdftk () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
-	# in order to make pdftk work on Ubuntu, you need to 
+	# in order to make pdftk work on Ubuntu, you need to
 	#	sudo snap install pdftk
 
 	pdftk "$INPUT" output "$OUTPUT" compress
 }
+
+
+shrink_recompress_v10 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_with_gs "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook"
+}
+shrink_recompress_v11 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_with_gs "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen"
+}
+shrink_recompress_v15 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_with_gs "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
+}
+shrink_recompress_v16 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_with_gs "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
+}
+shrink_recompress_v17 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_with_gs "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true -c \"<</AlwaysEmbed [ ]>> setdistillerparams\" -c \"<</NeverEmbed [/Courier /Courier-Bold /Courier-Oblique /Courier-BoldOblique /Helvetica /Helvetica-Bold /Helvetica-Oblique /Helvetica-BoldOblique /Times-Roman /Times-Bold /Times-Italic /Times-BoldItalic /Symbol /ZapfDingbats /Arial]>> setdistillerparams\""
+}
+shrink_recompress_v18 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_with_gs "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true -c \"<</AlwaysEmbed [ ]>> setdistillerparams\" -c \"<</NeverEmbed [/Courier /Courier-Bold /Courier-Oblique /Courier-BoldOblique /Helvetica /Helvetica-Bold /Helvetica-Oblique /Helvetica-BoldOblique /Times-Roman /Times-Bold /Times-Italic /Times-BoldItalic /Symbol /ZapfDingbats /Arial]>> setdistillerparams\""
+}
+
+shrink_recompress_v30 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local TMPFILE=`mktemp --tmpdir="${TMPDIR}"`;
+
+	pdf2ps "$INPUT" "$TMPFILE"
+	ps2pdf -dPDFSETTINGS=/screen "$TMPFILE" "$OUTPUT"
+}
+
+
 
 
 
@@ -127,7 +197,7 @@ for M in "${METHODS_ARR[@]}"; do
 	if [ "$VERBOSE" = "1" ]; then
 		printf '%-*s: ' 25 "$M"
 	fi;
-	
+
 	$M "$FILE" "$TMPFILE";
 
 	if [ "$VERBOSE" = "1" ]; then
