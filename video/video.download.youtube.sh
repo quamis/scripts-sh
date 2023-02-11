@@ -10,6 +10,8 @@
 # to install yt-dlp:
 #	python3 -m pip install -U yt-dlp
 
+# playlist:
+# video.download.youtube.sh DOWNLOADER="yt-dlp" EXTRA_ARGS='--match-filter "duration < 1200"' URL="https://www.youtube.com/watch?v=wEa5iw_K8-Q&list=PLKXgFwfBsqy-u7jT-JIq-Q8V1NiUbaXjL"
 
 # usage:
 # 	video.download.youtube.sh URL='https://www.youtube.com/watch?v=T5OkKPrcvT0'
