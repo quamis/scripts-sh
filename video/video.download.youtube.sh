@@ -42,8 +42,6 @@ done
 
 : ${IGNORE_ERRORS:="no"};
 
-: ${SPLIT_PLAYLIST:="no"};
-
 : ${REORGANISE:="no"};
 
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
@@ -99,36 +97,13 @@ for URL in `echo "$LIST" | sort`; do
 		C1="$C1 --write-sub --write-auto-sub --sub-lang ro,en --sub-format srt --convert-subs srt ";
 	fi;
 
-	if [[ "$SPLIT_PLAYLIST" == "yes" ]]; then
-		PREV_LIMIT=0;
-		for LIMIT in 2 4 6 8 10 20 30 40 50 60 70 80 90 100 200 300 400 500 600 700 800 900 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 3200 3400 3600 3800 4000 4500 5000 5500 6000 6500 7000 7500 8000 9000 "max"; do
-			PREV_LIMIT=$(( PREV_LIMIT + 1));
-			if [[ "$LIMIT" == "max" ]]; then
-				C3="--playlist-start ${PREV_LIMIT} ";
-			else
-				C3="--playlist-start ${PREV_LIMIT} --playlist-end ${LIMIT} ";
-			fi;
-
-			CMD="(mkdir -p \"${DIR}\" && youtube-dl $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio' $C2 $C3 $EXTRA_ARGS --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-
-			if [ "$VERBOSE" = "1" ]; then
-				echo "$CMD";
-			fi;
-
-			echo "$CMD" >> "$COMMANDFILE";
-			CMD="";
-
-			PREV_LIMIT=$LIMIT;
-		done;
-	else
-		CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio' $C2 $EXTRA_ARGS --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
-		if [ "$VERBOSE" = "1" ]; then
-			echo "$CMD";
-		fi;
-
-		# append to the command list
-		echo "$CMD" >> "$COMMANDFILE";
+	CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio' $C2 $EXTRA_ARGS --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+	if [ "$VERBOSE" = "1" ]; then
+		echo "$CMD";
 	fi;
+
+	# append to the command list
+	echo "$CMD" >> "$COMMANDFILE";
 done;
 IFS=$SAVEIFS
 
