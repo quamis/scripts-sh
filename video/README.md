@@ -1,4 +1,7 @@
 
+# video.download.youtube.sh DOWNLOADER=yt-dlp DOWNLOAD_SUBS=yes SPEED=1024 URL=https://www.youtube.com/watch?v=aaaaaaaaaaaaa
+
+
 # usage:
 # 	video.autoCrop.sh FILE='xyz.mkv'
 

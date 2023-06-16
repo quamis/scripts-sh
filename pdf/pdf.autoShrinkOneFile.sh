@@ -18,11 +18,11 @@ done
 
 
 : ${FILE:=""};
-: ${OFILE:="output.pdf"};
+: ${OFILE:="$FILE-compressed.pdf"};
 : ${TMPDIR:="/tmp/"};
-: ${VERBOSE:="0"};	# 0, 1
+: ${VERBOSE:="1"};	# 0, 1
 : ${KEEP:="smallest"};
-# : ${METHODS:="shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk"};
+# : ${METHODS:="shrink_images_to_75dpi,shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk"};
 : ${METHODS:="shrink_images_to_300dpi,shrink_ps2pdf_printer"};
 # : ${METHODS:="shrink_recompress_v10,shrink_recompress_v11,shrink_recompress_v15,shrink_recompress_v16,shrink_recompress_v17,shrink_recompress_v18,shrink_recompress_v30"};
 
@@ -68,6 +68,12 @@ local_shrink_with_gs () {
 	eval $CMD
 }
 
+shrink_images_to_75dpi () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_images_with_gs "$INPUT" "$OUTPUT" "75"
+}
 
 shrink_images_to_150dpi () {
 	local INPUT="$1"
