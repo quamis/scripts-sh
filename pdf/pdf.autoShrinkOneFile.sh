@@ -22,8 +22,8 @@ done
 : ${TMPDIR:="/tmp/"};
 : ${VERBOSE:="1"};	# 0, 1
 : ${KEEP:="smallest"};
-# : ${METHODS:="shrink_images_to_75dpi,shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk"};
-: ${METHODS:="shrink_images_to_300dpi,shrink_ps2pdf_printer"};
+# : ${METHODS:="shrink_images_to_75dpi,shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk,qpdf_recompress_v10"};
+: ${METHODS:="shrink_images_to_300dpi,shrink_ps2pdf_printer,qpdf_recompress_v10"};
 # : ${METHODS:="shrink_recompress_v10,shrink_recompress_v11,shrink_recompress_v15,shrink_recompress_v16,shrink_recompress_v17,shrink_recompress_v18,shrink_recompress_v30"};
 
 # : ${METHODS:=$((compgen -A function | grep shrink_ | tr "\n" ","))};
@@ -138,6 +138,26 @@ shrink_pdftk () {
 	pdftk "$INPUT" output "$OUTPUT" compress
 }
 
+
+local_shrink_images_with_qpdf () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+	local PARAMS="$3"
+
+	# in order to make pdftk work on Ubuntu, you need to
+	#	apt install qpdf
+
+
+	qpdf $PARAMS "$INPUT" "$OUTPUT"
+
+}
+
+qpdf_recompress_v10 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	local_shrink_images_with_qpdf "$INPUT" "$OUTPUT" "--object-streams=generate --compress-streams=y --recompress-flate --compression-level=9 --optimize-images"
+}
 
 shrink_recompress_v10 () {
 	local INPUT="$1"
