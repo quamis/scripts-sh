@@ -18,7 +18,7 @@ done
 
 
 : ${FILE:=""};
-: ${OFILE:="$FILE-compressed.pdf"};
+: ${OFILE:="$FILE-compressed,__SIZE__,v__INDEX__.pdf"};
 : ${TMPDIR:="/tmp/"};
 : ${VERBOSE:="1"};	# 0, 1
 : ${KEEP:="smallest"};
@@ -234,20 +234,51 @@ done
 
 FILELIST=`mktemp --tmpdir="${TMPDIR}"`;
 for TMPFILE in "${FILES_ARR[@]}"; do
-	SIZE=`du --bytes "$TMPFILE" | cut -f1 -d" "`
+	SIZE=`du --bytes "$TMPFILE" | sed -r "s/\\s+/ /g" | cut -f1 -d" "`
 	echo "$SIZE $TMPFILE" >> "$FILELIST";
 done;
 
-SMALLEST_FILE=`cat "$FILELIST" | sort -n | head -n 1 | cut -f2 -d" "`
+
+SMALLEST_FILES=()
 if [ "$KEEP" == "smallest" ]; then
 	# default
 	SMALLEST_FILE=`cat "$FILELIST" | sort -n | head -n 1 | cut -f2 -d" "`
+	SMALLEST_FILES+=("$SMALLEST_FILE")
+elif [ "$KEEP" == "smaller" ]; then
+	FILESIZE=`du --bytes "$FILE" | sed -r "s/\\s+/ /g" | cut -f1 -d" "`;
+
+	FILELIST2=`mktemp --tmpdir="${TMPDIR}"`;
+	cat "$FILELIST" | sort -n | awk -F" "  "{ if( \$1<$FILESIZE ) print \$2 }" > "$FILELIST2"
+
+	while read F; do
+		SMALLEST_FILES+=("$F")
+	done < "$FILELIST2"
+
+	rm "$FILELIST2";
 elif [ "$KEEP" == "largest" ]; then
 	# default
 	SMALLEST_FILE=`cat "$FILELIST" | sort -rn | head -n 1 | cut -f2 -d" "`
+	SMALLEST_FILES+=("$SMALLEST_FILE")
+else
+	echo "Please specify KEEP";
+	exit;
 fi;
 
-cp -f "$SMALLEST_FILE" "$OFILE"
+
+INDEX=0;
+for TMPFILE in "${SMALLEST_FILES[@]}"; do
+	NNAME="$OFILE";
+
+	INDEX=$((INDEX + 1));
+	NNAME="${NNAME/__INDEX__/$INDEX}";
+
+	SIZE=`du -h "$TMPFILE" | sed -r "s/\\s+/ /g" | cut -f1 -d" "`
+	NNAME="${NNAME/__SIZE__/$SIZE}";
+
+	echo "--> ${NNAME}";
+	cp -f "$TMPFILE" "${NNAME}";
+done;
+
 
 rm "$FILELIST";
 for TMPFILE in "${FILES_ARR[@]}"; do
