@@ -5,6 +5,7 @@
 
 # if installed via pip, update is done like this:
 # 	pip install -U youtube-dl
+# 	pip install -U yt-dlp
 # to check if installed via pip, do this:
 # 	pip list | grep youtube-dl
 
