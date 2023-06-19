@@ -28,6 +28,7 @@ done
 # : ${METHODS:="shrink_images_to_75dpi,shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_convert_zip_150,shrink_convert_zip_300_ps2pdf_printer,shrink_pdftk,shrink_recompress_v40"};
 : ${METHODS:="shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_recompress_v40"};
 # : ${METHODS:="shrink_recompress_v10,shrink_recompress_v11,shrink_recompress_v15,shrink_recompress_v16,shrink_recompress_v17,shrink_recompress_v18,shrink_recompress_v30"};
+# : ${METHODS:="shrink_images_to_75dpi,shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_pdftk,shrink_recompress_v10,shrink_recompress_v11,shrink_recompress_v15,shrink_recompress_v16,shrink_recompress_v17,shrink_recompress_v18,shrink_recompress_v30,shrink_recompress_v40"};
 
 # : ${METHODS:=$((compgen -A function | grep shrink_ | tr "\n" ","))};
 
