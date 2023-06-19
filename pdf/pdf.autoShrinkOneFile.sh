@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # @requires
-# apt-install gs pdftk
+# apt install ghostscript pdftk qpdf
 
 
 # pdf.autoShrinkOneFile.sh FILE=tests/input.pdf
