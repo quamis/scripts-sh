@@ -2,6 +2,9 @@
 
 # @requires
 # apt install ghostscript pdftk qpdf
+# setup:https://stackoverflow.com/questions/52998331/imagemagick-security-policy-pdf-blocking-conversion
+#	in /etc/ImageMagick-7/policy.xml
+#	  <policy domain="coder" rights="read | write" pattern="PDF" />
 
 
 # pdf.autoShrinkOneFile.sh FILE=tests/input.pdf
