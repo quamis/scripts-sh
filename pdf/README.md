@@ -6,8 +6,13 @@ apt install gs pdftk qpdf
 # usage:
 ```sh
 FILE="xyz.pdf";
-pdf.autoShrinkOneFile.sh METHODS="shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_recompress_v40" KEEP=smaller RUN_MODE=parallel FILE="$FILE"
+pdf.autoShrinkOneFile.sh METHODS="lowq" KEEP=smaller RUN_MODE=parallel FILE="$FILE"
 
-pdf.autoShrinkOneFile.sh METHODS="shrink_images_to_75dpi,shrink_images_to_150dpi,shrink_images_to_300dpi,shrink_ps2pdf_printer,shrink_ps2pdf_ebook,shrink_pdftk,shrink_recompress_v10,shrink_recompress_v11,shrink_recompress_v15,shrink_recompress_v16,shrink_recompress_v17,shrink_recompress_v18,shrink_recompress_v30,shrink_recompress_v40" KEEP=smaller RUN_MODE=parallel FILE="$FILE"
+
+for FILE in *.pdf; do pdf.autoShrinkOneFile.sh METHODS="all" KEEP=none RUN_MODE=parallel FILE="$FILE" VERBOSE="2" > "$FILE.log"; done
+
+
+for FILE in *.log; do echo ""; echo "$FILE"; cat "$FILE" | egrep -o "^(original|(shrink_[a-zA-Z0-9_]+?))\s[0-9]+" | sort -n -t$'\t' -k2,2; done
+
 
 ```
