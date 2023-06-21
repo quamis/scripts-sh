@@ -26,7 +26,7 @@ done
 : ${VERBOSE:="1"};	# 0, 1
 : ${KEEP:="smallest"};
 
-: ${METHODS:="all"};
+: ${METHODS:="default"};
 
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${COMMANDFILE:=`mktemp --tmpdir="${TMPDIR}"`};
@@ -94,12 +94,30 @@ shrink_remove_images () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to filter out all images from the input";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "destructive";
+		return;
+	fi;
+
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dFILTERIMAGE"
 }
 
 shrink_remove_images_remove_vectors () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to filter out all images and vectors from the input";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "destructive";
+		return;
+	fi;
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dFILTERIMAGE -dFILTERVECTOR"
 }
@@ -108,12 +126,30 @@ shrink_images_to_75dpi () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 75dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "lowq";
+		return;
+	fi;
+
 	helper_gs_shrinkImages "$INPUT" "$OUTPUT" "75"
 }
 
 shrink_images_to_150dpi () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 150dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
 
 	helper_gs_shrinkImages "$INPUT" "$OUTPUT" "150"
 }
@@ -122,12 +158,30 @@ shrink_images_to_300dpi () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 300dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "hiq";
+		return;
+	fi;
+
 	helper_gs_shrinkImages "$INPUT" "$OUTPUT" "300"
 }
 
 shrink_ps2pdf_printer () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ps2pdf with printer settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "hiq";
+		return;
+	fi;
 
 	ps2pdf -dPDFSETTINGS=/printer "$INPUT" "$OUTPUT"
 }
@@ -136,12 +190,48 @@ shrink_ps2pdf_ebook () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ps2pdf with ebook settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
 	ps2pdf -dPDFSETTINGS=/ebook "$INPUT" "$OUTPUT"
 }
+
+shrink_ps2pdf_screen () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ps2pdf with ebook settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
+	ps2pdf -dPDFSETTINGS=/screen "$INPUT" "$OUTPUT"
+}
+
 
 shrink_convert_zip_150 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use convert & compress as zip, 150x150";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "lowq";
+		return;
+	fi;
+
 
 	# in order to make convert work on Ubuntu, you need to remove the restriction placed on convert for encoding PDF's:
 	# comment <!-- <policy domain="coder" rights="none" pattern="PDF" /> --> into /etc/ImageMagick-6/policy.xml
@@ -153,6 +243,15 @@ shrink_convert_zip_150 () {
 shrink_convert_zip_150_ps2pdf_printer () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use convert & compress as zip, 150x150, then recompress to pdf, printer settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "lowq";
+		return;
+	fi;
 
 	# in order to make convert work on Ubuntu, you need to remove the restriction placed on convert for encoding PDF's:
 	# comment <!-- <policy domain="coder" rights="none" pattern="PDF" /> --> into /etc/ImageMagick-6/policy.xml
@@ -168,6 +267,16 @@ shrink_pdftk () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use pdftk to compress";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "hiq";
+		return;
+	fi;
+
+
 	# in order to make pdftk work on Ubuntu, you need to
 	#	sudo snap install pdftk
 
@@ -178,11 +287,29 @@ shrink_gs_v11 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript with ebook settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook"
 }
 shrink_gs_v12 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript with screen settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen"
 }
@@ -190,11 +317,29 @@ shrink_gs_v15 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript with ebook settings, no embbeded fonts";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
 }
 shrink_gs_v16 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript with screen settings, no embbeded fonts";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
 }
@@ -202,12 +347,30 @@ shrink_gs_v17 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript with screen settings, no embbeded fonts, v2";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true -c \"<</AlwaysEmbed [ ]>> setdistillerparams\" -c \"<</NeverEmbed [/Courier /Courier-Bold /Courier-Oblique /Courier-BoldOblique /Helvetica /Helvetica-Bold /Helvetica-Oblique /Helvetica-BoldOblique /Times-Roman /Times-Bold /Times-Italic /Times-BoldItalic /Symbol /ZapfDingbats /Arial]>> setdistillerparams\""
 }
 
 shrink_ps2pdf_v11 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use pdf2ps & ps2pdf with screen settings";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
 
 	local TMPFILE=`mktemp --tmpdir="${TMPDIR}"`;
 
@@ -219,30 +382,63 @@ shrink_qpdf_v11 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use qpdf with stream compression and image recompression";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
 	helper_qpdf_generalShrink "$INPUT" "$OUTPUT" "--object-streams=generate --compress-streams=y --recompress-flate --compression-level=9 --optimize-images"
 }
 
+ALLMETHODS=$(compgen -A function | egrep "shrink_" | tr "\n" ",");
+ALLMETHODS_ARR=(${ALLMETHODS//,/ });
+ALLMETHODS_CATEGORIES=();
+for M in "${ALLMETHODS_ARR[@]}"; do
+	C="$($M ".category" "")";
+	ALLMETHODS_CATEGORIES+=( "$C" );
+done;
+# echo "${ALLMETHODS_CATEGORIES[*]}";
 
-
-
+IFS=$'\n' ALLMETHODS_CATEGORIES=($(sort <<<"${ALLMETHODS_CATEGORIES[*]}" | uniq)) unset IFS;
+# echo "${ALLMETHODS_CATEGORIES[*]}"; exit;
 
 if [[ "$FILE" == "" ]]; then
-   echo "Please specify FILE=filename";
-   exit;
+   	echo "Please specify FILE=filename";
+
+	echo "Available shrink methods:";
+	for M in "${ALLMETHODS_ARR[@]}"; do
+		echo "  $M";
+		echo -ne "      ";
+		echo -ne "[$($M ".category" "")]";
+		echo -ne " $($M ".descript" "")";
+		echo "";
+	done;
+   	exit;
 fi
 
 if [[ "$METHODS" == "all" ]]; then
 	METHODS=$(compgen -A function | egrep "shrink_" | tr "\n" ",");
 elif [[ "$METHODS" == "gs" ]]; then
+	# everything that uses gs
 	METHODS=$(compgen -A function | egrep "(shrink_.*gs_)" | tr "\n" ",");
-elif [[ "$METHODS" == "qpdf" ]]; then
-	METHODS=$(compgen -A function | egrep "(shrink_.*qpdf_)" | tr "\n" ",");
-elif [[ "$METHODS" == "destructive" ]]; then
-	METHODS=$(compgen -A function | egrep "(shrink_.*remove_)" | tr "\n" ",");
-elif [[ "$METHODS" == "lowq" ]]; then
-	METHODS=$(compgen -A function | egrep "(shrink_.*(remove_|images_|qpdf_))" | tr "\n" ",");
-elif [[ "$METHODS" == "hiq" ]]; then
-	METHODS=$(compgen -A function | egrep "(shrink_gs_|shrink_convert_|shrink_ps2pdf_)|(shrink.*(150|300))" | tr "\n" ",");
+else
+	# category request
+	REQUESTEDMETHOD="$METHODS";
+	for C in "${ALLMETHODS_CATEGORIES[@]}"; do
+		if [[ "$REQUESTEDMETHOD" == "$C" ]]; then
+			METHODS="";
+			for M in "${ALLMETHODS_ARR[@]}"; do
+				MC="$($M ".category" "")";
+				if [[ "$MC" == "$C" ]]; then
+					METHODS="$METHODS,$M";
+				fi;
+			done;
+		fi;
+	done;
 fi;
 # else, use the list as-is
 
