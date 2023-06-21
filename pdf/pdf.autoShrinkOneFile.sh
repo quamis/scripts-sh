@@ -298,6 +298,7 @@ shrink_gs_v11 () {
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook"
 }
+
 shrink_gs_v12 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
@@ -313,6 +314,7 @@ shrink_gs_v12 () {
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen"
 }
+
 shrink_gs_v15 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
@@ -328,6 +330,7 @@ shrink_gs_v15 () {
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
 }
+
 shrink_gs_v16 () {
 	local INPUT="$1"
 	local OUTPUT="$2"

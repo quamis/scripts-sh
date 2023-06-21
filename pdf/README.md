@@ -12,9 +12,22 @@ pdf.autoShrinkOneFile.sh METHODS="lowq" KEEP=smaller RUN_MODE=parallel FILE="$FI
 
 
 
-for FILE in *.pdf; do pdf.autoShrinkOneFile.sh METHODS="all" KEEP=none RUN_MODE=parallel FILE="$FILE" VERBOSE="2" > "$FILE.log"; done
+for FILE in *.pdf; do
+    echo $FILE;
+    [[ ! -f "$FILE.log" ]] && pdf.autoShrinkOneFile.sh METHODS="all" KEEP=none RUN_MODE=parallel FILE="$FILE" VERBOSE="2" > "$FILE.log";
+done
 
-for FILE in *.log; do echo ""; echo "$FILE"; cat "$FILE" | egrep -o "^(original|(shrink_[a-zA-Z0-9_]+?))\s[0-9]+" | sort -n -t$'\t' -k2,2; done > report.txt
+
+rm ./report.json;
+for FILE in *.log; do
+    cat "$FILE" | egrep -o "^(original|(shrink_[a-zA-Z0-9_]+?))\s[0-9]+.+" | generateReport.php;
+done;
+generateReport.php | less;
+
+
+
+
+# for FILE in *.log; do echo ""; echo "$FILE"; cat "$FILE" | egrep -o "^(original|(shrink_[a-zA-Z0-9_]+?))\s[0-9]+" | sort -n -t$'\t' -k2,2; done > report.txt
 
 
 
