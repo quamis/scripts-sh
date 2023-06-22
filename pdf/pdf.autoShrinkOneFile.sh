@@ -21,7 +21,8 @@ done
 
 
 : ${FILE:=""};
-: ${OFILE:="$FILE-compressed,__SIZE__,v__INDEX__.pdf"};
+# : ${OFILE:="$FILE-compressed,__SIZE__,v__INDEX__.pdf"};
+: ${OFILE:="$FILE-compressed,__SIZE__,__METHOD__.pdf"};
 : ${TMPDIR:="/tmp/"};
 : ${VERBOSE:="1"};	# 0, 1
 : ${KEEP:="smallest"};
@@ -346,6 +347,7 @@ shrink_gs_v16 () {
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
 }
+
 shrink_gs_v17 () {
 	local INPUT="$1"
 	local OUTPUT="$2"
@@ -460,7 +462,7 @@ fi
 
 FILES_ARR=()
 for M in "${METHODS_ARR[@]}"; do
-	TMPFILE=`mktemp --tmpdir="${TMPDIR}"`;
+	TMPFILE=`mktemp --suffix ".${M}" --tmpdir="${TMPDIR}"`;
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "(printf '    %-*s: ' 25 \"$M\" && $M \"$FILE\" \"$TMPFILE\" && du -sh \"$TMPFILE\")" >> "$COMMANDFILE";
@@ -537,6 +539,9 @@ for TMPFILE in "${SMALLEST_FILES[@]}"; do
 
 	SIZE=`du -h "$TMPFILE" | sed -r "s/\\s+/ /g" | cut -f1 -d" "`
 	NNAME="${NNAME/__SIZE__/$SIZE}";
+
+	M=`echo -ne "$TMPFILE" | sed -r "s/.+\.(shrink_.+)/\1/"`
+	NNAME="${NNAME/__METHOD__/$M}";
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "--> ${NNAME}";
