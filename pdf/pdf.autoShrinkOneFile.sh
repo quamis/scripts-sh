@@ -68,6 +68,7 @@ helper_gs_shrinkImages_screen () {
 	  -dAutoRotatePages=/None						\
 	  -dDownsampleColorImages=true					\
 	  -dDetectDuplicateImages=true					\
+	  -r$IMAGE_RESOLUTION							\
 	  -dColorImageDownsampleType=/Bicubic			\
 	  -dColorImageResolution=$IMAGE_RESOLUTION		\
 	  -dGrayImageDownsampleType=/Bicubic			\
@@ -75,7 +76,8 @@ helper_gs_shrinkImages_screen () {
 	  -dMonoImageDownsampleType=/Subsample			\
 	  -dMonoImageResolution=$IMAGE_RESOLUTION		\
 	  -sOutputFile="$OUTPUT"						\
-	  "$INPUT"
+	  -c "<</ColorImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams <</GrayImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams" \
+	  -f "$INPUT"
 }
 
 
@@ -99,8 +101,9 @@ helper_gs_shrinkImages_printer () {
 # -f "input.pdf"
 
 
-	#@see https://www.ghostscript.com/doc/9.22/VectorDevices.htm#PDFWRITE
+	# @see https://www.ghostscript.com/doc/9.22/VectorDevices.htm#PDFWRITE
 	# @see https://web.mit.edu/ghostscript/www/Ps2pdf.htm#Options
+	# @see https://ghostscript.com/docs/9.54.0/VectorDevices.htm
 	gs												\
 	  -q -dNOPAUSE -dBATCH -dSAFER					\
 	  -sDEVICE=pdfwrite								\
@@ -119,8 +122,10 @@ helper_gs_shrinkImages_printer () {
 	  -dMonoImageDownsampleType=/Subsample			\
 	  -dMonoImageResolution=$IMAGE_RESOLUTION		\
 	  -sOutputFile="$OUTPUT"						\
-	#   -c "<</ColorImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams <</GrayImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams" \
-	  "$INPUT"
+	  -c "<</ColorImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams <</GrayImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams" \
+	  -f "$INPUT"
+
+
 }
 
 
@@ -131,7 +136,6 @@ helper_qpdf_generalShrink () {
 
 	# in order to make pdftk work on Ubuntu, you need to
 	#	apt install qpdf
-
 
 	qpdf $PARAMS "$INPUT" "$OUTPUT"
 }
