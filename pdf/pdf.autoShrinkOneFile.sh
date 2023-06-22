@@ -51,12 +51,13 @@ helper_gs_generalShrink () {
 	gs -o "$OUTPUT" -q -dNOPAUSE -dBATCH -dSAFER -sDEVICE=pdfwrite $PARAMS -f "$INPUT"
 }
 
-helper_gs_shrinkImages () {
+helper_gs_shrinkImages_screen () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 	local IMAGE_RESOLUTION="$3"
 
 	#@see https://www.ghostscript.com/doc/9.22/VectorDevices.htm#PDFWRITE
+	# @see https://web.mit.edu/ghostscript/www/Ps2pdf.htm#Options
 	gs												\
 	  -q -dNOPAUSE -dBATCH -dSAFER					\
 	  -sDEVICE=pdfwrite								\
@@ -76,6 +77,52 @@ helper_gs_shrinkImages () {
 	  -sOutputFile="$OUTPUT"						\
 	  "$INPUT"
 }
+
+
+helper_gs_shrinkImages_printer () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+	local IMAGE_RESOLUTION="$3"
+
+# @see https://stackoverflow.com/questions/72950690/gs-ghost-script-cannot-adjust-pdf-size-either-adjust-to-28mb-or-either-to-128
+# cmdline=
+# -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="output.pdf" -dAutoRotatePages=/None \
+# -dEmbedAllFonts=true -dSubsetFonts=true -dDetectDuplicateImages=true -dDoThumbnails=false \
+# -dAutoFilterColorImages=false -dAutoFilterGrayImages=false -dAutoFilterMonoImages=false \
+# -r144 -dColorImageResolution=144 -dGrayImageResolution=144 -dMonoImageResolution=144 \
+# -dDownsampleColorImages=true -dColorImageDownsampleType=/Bicubic -dColorImageDownsampleThreshold=1.0 \
+# -dDownsampleGrayImages=true -dGrayImageDownsampleType=/Bicubic -dGrayImageDownsampleThreshold=1.0 \
+# -dDownsampleMonoImages=true -dMonoImageDownsampleType=/Subsample -dMonoImageDownsampleThreshold=1.0 \
+# -dColorConversionStrategy=/sRGB -dProcessColorModel=/DeviceRGB -dPassThroughJPEGImages=false \
+# -dColorImageFilter=/DCTEncode -dGrayImageFilter=/DCTEncode -dMonoImageFilter=/CCITTFaxEncode \
+# -c " <</ColorImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams <</GrayImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams" \
+# -f "input.pdf"
+
+
+	#@see https://www.ghostscript.com/doc/9.22/VectorDevices.htm#PDFWRITE
+	# @see https://web.mit.edu/ghostscript/www/Ps2pdf.htm#Options
+	gs												\
+	  -q -dNOPAUSE -dBATCH -dSAFER					\
+	  -sDEVICE=pdfwrite								\
+	  -dCompatibilityLevel=1.4						\
+	  -dPDFSETTINGS=/printer						\
+	  -dEmbedAllFonts=true							\
+	  -dSubsetFonts=true							\
+	  -dAutoRotatePages=/None						\
+	  -dDownsampleColorImages=true					\
+	  -dDetectDuplicateImages=true					\
+	  -r$IMAGE_RESOLUTION							\
+	  -dColorImageDownsampleType=/Bicubic			\
+	  -dColorImageResolution=$IMAGE_RESOLUTION		\
+	  -dGrayImageDownsampleType=/Bicubic			\
+	  -dGrayImageResolution=$IMAGE_RESOLUTION		\
+	  -dMonoImageDownsampleType=/Subsample			\
+	  -dMonoImageResolution=$IMAGE_RESOLUTION		\
+	  -sOutputFile="$OUTPUT"						\
+	#   -c "<</ColorImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams <</GrayImageDict  <</QFactor 0.24 /Blend 1 /ColorTransform 1 /HSample [1 1 1 1] /VSample [1 1 1 1]>> >> setdistillerparams" \
+	  "$INPUT"
+}
+
 
 helper_qpdf_generalShrink () {
 	local INPUT="$1"
@@ -123,12 +170,12 @@ shrink_remove_images_remove_vectors () {
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dFILTERIMAGE -dFILTERVECTOR"
 }
 
-shrink_images_to_75dpi () {
+shrink_images_to_50dpi () {
 	local INPUT="$1"
 	local OUTPUT="$2"
 
 	if [[ "$INPUT" == ".descript" ]]; then
-		echo -ne "use ghostscript to recompress all images to 75dpi";
+		echo -ne "use ghostscript to recompress all images to 50dpi";
 		return;
 	fi;
 	if [[ "$INPUT" == ".category" ]]; then
@@ -136,7 +183,40 @@ shrink_images_to_75dpi () {
 		return;
 	fi;
 
-	helper_gs_shrinkImages "$INPUT" "$OUTPUT" "75"
+	helper_gs_shrinkImages_screen "$INPUT" "$OUTPUT" "50"
+}
+
+
+shrink_images_to_72dpi () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 72dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "lowq";
+		return;
+	fi;
+
+	helper_gs_shrinkImages_screen "$INPUT" "$OUTPUT" "72"
+}
+
+shrink_images_to_96dpi () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 96dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "lowq";
+		return;
+	fi;
+
+	helper_gs_shrinkImages_screen "$INPUT" "$OUTPUT" "96"
 }
 
 shrink_images_to_150dpi () {
@@ -152,8 +232,9 @@ shrink_images_to_150dpi () {
 		return;
 	fi;
 
-	helper_gs_shrinkImages "$INPUT" "$OUTPUT" "150"
+	helper_gs_shrinkImages_screen "$INPUT" "$OUTPUT" "150"
 }
+
 
 shrink_images_to_300dpi () {
 	local INPUT="$1"
@@ -168,8 +249,43 @@ shrink_images_to_300dpi () {
 		return;
 	fi;
 
-	helper_gs_shrinkImages "$INPUT" "$OUTPUT" "300"
+	helper_gs_shrinkImages_printer "$INPUT" "$OUTPUT" "300"
 }
+
+
+shrink_images_to_450dpi () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 450dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "hiq";
+		return;
+	fi;
+
+	helper_gs_shrinkImages_printer "$INPUT" "$OUTPUT" "450"
+}
+
+
+shrink_images_to_600dpi () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use ghostscript to recompress all images to 600dpi";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "hiq";
+		return;
+	fi;
+
+	helper_gs_shrinkImages_printer "$INPUT" "$OUTPUT" "600"
+}
+
 
 shrink_ps2pdf_printer () {
 	local INPUT="$1"
@@ -212,7 +328,7 @@ shrink_ps2pdf_screen () {
 		return;
 	fi;
 	if [[ "$INPUT" == ".category" ]]; then
-		echo -ne "default";
+		echo -ne "lowq";
 		return;
 	fi;
 
@@ -309,7 +425,7 @@ shrink_gs_v12 () {
 		return;
 	fi;
 	if [[ "$INPUT" == ".category" ]]; then
-		echo -ne "default";
+		echo -ne "lowq";
 		return;
 	fi;
 
@@ -341,28 +457,29 @@ shrink_gs_v16 () {
 		return;
 	fi;
 	if [[ "$INPUT" == ".category" ]]; then
-		echo -ne "default";
+		echo -ne "lowq";
 		return;
 	fi;
 
 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true "
 }
 
-shrink_gs_v17 () {
-	local INPUT="$1"
-	local OUTPUT="$2"
+# TODO: implement this, as it doesn't skip font embedding as expected, and generates errors and blank pdf's
+# shrink_gs_v17 () {
+# 	local INPUT="$1"
+# 	local OUTPUT="$2"
 
-	if [[ "$INPUT" == ".descript" ]]; then
-		echo -ne "use ghostscript with screen settings, no embbeded fonts, v2";
-		return;
-	fi;
-	if [[ "$INPUT" == ".category" ]]; then
-		echo -ne "default";
-		return;
-	fi;
+# 	if [[ "$INPUT" == ".descript" ]]; then
+# 		echo -ne "use ghostscript with screen settings, no embbeded fonts, v2";
+# 		return;
+# 	fi;
+# 	if [[ "$INPUT" == ".category" ]]; then
+# 		echo -ne "default";
+# 		return;
+# 	fi;
 
-	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true -c \"<</AlwaysEmbed [ ]>> setdistillerparams\" -c \"<</NeverEmbed [/Courier /Courier-Bold /Courier-Oblique /Courier-BoldOblique /Helvetica /Helvetica-Bold /Helvetica-Oblique /Helvetica-BoldOblique /Times-Roman /Times-Bold /Times-Italic /Times-BoldItalic /Symbol /ZapfDingbats /Arial]>> setdistillerparams\""
-}
+# 	helper_gs_generalShrink "$INPUT" "$OUTPUT" "-dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -dEmbedAllFonts=false -dSubsetFonts=true -dConvertCMYKImagesToRGB=true -dCompressFonts=true -c '.setpdfwrite <</AlwaysEmbed [/Helvetica /Times-Roman]>> setdistillerparams'"
+# }
 
 shrink_ps2pdf_v11 () {
 	local INPUT="$1"
@@ -373,7 +490,7 @@ shrink_ps2pdf_v11 () {
 		return;
 	fi;
 	if [[ "$INPUT" == ".category" ]]; then
-		echo -ne "default";
+		echo -ne "lowq";
 		return;
 	fi;
 
