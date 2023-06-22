@@ -60,7 +60,7 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	fi;
 
     # for PNG quality encoding, see https://stackoverflow.com/questions/9710118/convert-multipage-pdf-to-png-and-back-linux/12046542#12046542
-	CMD="( [[ ! -f \"${FILE_DIR_AND_NAME_AND_EXT}.log\" ]] && pdf.autoShrinkOneFile.sh RUN_MODE=parallel VERBOSE=2 FILE=\"${FILE_DIR_AND_NAME_AND_EXT}\" KEEP=\"${KEEP}\" > \"${FILE_DIR_AND_NAME_AND_EXT}.log\")"
+	CMD="( [[ ! -f \"${FILE_DIR_AND_NAME_AND_EXT}.log\" ]] && pdf.autoShrinkOneFile.sh RUN_MODE=parallel VERBOSE=2 METHODS=\"${METHODS}\" FILE=\"${FILE_DIR_AND_NAME_AND_EXT}\" KEEP=\"${KEEP}\" > \"${FILE_DIR_AND_NAME_AND_EXT}.log\")"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";

@@ -12,6 +12,10 @@ function median(array $arr)
     return $arr[(int)(count($arr)/2)];
 }
 
+ini_set('xdebug.var_display_max_depth', '10');
+ini_set('xdebug.var_display_max_children', '256');
+ini_set('xdebug.var_display_max_data', '1024');
+
 $reportJSON = @file_get_contents("report.json");;
 if ($reportJSON) {
     $reportJSON = json_decode($reportJSON, JSON_OBJECT_AS_ARRAY);
