@@ -12,6 +12,9 @@ pdf.autoShrinkOneFile.sh METHODS="lowq" KEEP=smaller RUN_MODE=parallel FILE="$FI
 
 
 
+# shrinker analysis
+pdf.autoShrinkOneFile.sh METHODS="default" KEEP=none RUN_MODE=parallel FILE="$FILE" VERBOSE="2"
+
 for FILE in *.pdf; do
     echo $FILE;
     [[ ! -f "$FILE.log" ]] && pdf.autoShrinkOneFile.sh METHODS="all" KEEP=none RUN_MODE=parallel FILE="$FILE" VERBOSE="2" > "$FILE.log";

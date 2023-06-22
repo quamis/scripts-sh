@@ -455,7 +455,7 @@ if [ "$VERBOSE" = "1" ]; then
 	echo "Compressing $FILE, `du -h "$FILE" | sed -r "s/\\s+/ /g" | cut -f1 -d" "`";
 	echo "  trying ${#METHODS_ARR[@]} methods";
 elif [ "$VERBOSE" = "2" ]; then
-	echo -e "original\t`du --bytes "$FILE"`";
+	echo -e "original\t0ns\t0ns\t`du --bytes "$FILE"`";
 fi
 
 FILES_ARR=()
@@ -465,7 +465,7 @@ for M in "${METHODS_ARR[@]}"; do
 	if [ "$VERBOSE" = "1" ]; then
 		echo "(printf '    %-*s: ' 25 \"$M\" && $M \"$FILE\" \"$TMPFILE\" && du -sh \"$TMPFILE\")" >> "$COMMANDFILE";
 	elif [ "$VERBOSE" = "2" ]; then
-		echo "(echo -ne \"$M\t\" && $M \"$FILE\" \"$TMPFILE\" && du --bytes \"$TMPFILE\")" >> "$COMMANDFILE";
+		echo "(echo -ne \"$M\t\" && echo -ne \"$((`date +%s%N`))ns\t\" && $M \"$FILE\" \"$TMPFILE\" && echo -ne \"$((`date +%s%N`))ns\t\" && du --bytes \"$TMPFILE\")" >> "$COMMANDFILE";
 	else
 		echo "($M \"$FILE\" \"$TMPFILE\")" >> "$COMMANDFILE";
 	fi;
