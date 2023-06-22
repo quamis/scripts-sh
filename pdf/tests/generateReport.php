@@ -28,15 +28,28 @@ if (!stream_isatty(STDIN)) {
     $INPUT = file_get_contents("php://stdin");
 
     $INPUTARR = array_filter(explode("\n", $INPUT));
-    $INPUTARR = array_map(function($line) {
-        preg_match("/^(?P<function>[^\s]+)[\s]+(?P<size>[0-9]+)[\s]+(?P<file>.+)$/", $line, $m);
+    $INPUTARR = array_filter(array_map(function($line) {
+        $regexp = "/^(?P<function>(shrink_[^\s]+|original))[\s]+(?P<time_start>[0-9]+)ns[\s]+(?P<time_end>[0-9]+)ns[\s]+(?P<size>[0-9]+)[\s]+(?P<file>.+)$/";
+        preg_match($regexp, $line, $m);
+        if (!$m) {
+            $regexp = "/(?P<function>(shrink_[^\s]+|original))[\s]+(?P<time_start>[0-9]+)ns[\s]+(?P<time_end>[0-9]+)ns[\s]+(?P<size>[0-9]+)[\s]+(?P<file>.+)$/";
+            preg_match($regexp, $line, $m);
+        }
+
+        if (!$m) {
+            return false;
+        }
+
+
 
         return [
             'function' =>   $m['function'],
+            'time_start' => $m['time_start'],
+            'time_end' =>   $m['time_end'],
             'size' =>       $m['size'],
             'file' =>       $m['file'],
         ];
-    }, $INPUTARR);
+    }, $INPUTARR));
 
     usort($INPUTARR, function ($a, $b) {
         return $a['size'] - $b['size'];
@@ -61,7 +74,8 @@ if (!stream_isatty(STDIN)) {
             'date' => date("Y-m-d H:i:s"),
             'file' => $ORIGINAL['file'],
             'compressedSize' =>                 $functionDetails['size'],
-            'compressionPercentage' =>          100*$functionDetails['size']/$ORIGINAL['size'],
+            'compression:percentage' =>          100*$functionDetails['size']/$ORIGINAL['size'],
+            'compression:duration' =>           ($functionDetails['time_end'] - $functionDetails['time_start'])/1000000,
             'overall:order' =>                  $index,
             'comparedToOriginal:isLarger' =>    ($index>$ORIGINALINDEX),
             'comparedToOriginal:isSmaller' =>   ($index<$ORIGINALINDEX),
@@ -75,11 +89,11 @@ else {
     $ORIGINAL = $reportJSON['original'];
     uasort($reportJSON, function($a, $b) {
         // $aarr = array_map(function($instance){
-        //     return $instance['compressionPercentage'];
+        //     return $instance['compression:percentage'];
         // }, $a['history']);
 
         // $barr = array_map(function($instance){
-        //     return $instance['compressionPercentage'];
+        //     return $instance['compression:percentage'];
         // }, $b['history']);
 
         // return 1000 * (avg($aarr) - avg($barr));
@@ -99,12 +113,12 @@ else {
         printf("\n%s, %d files tested", $function, count($functionDetails['history']));
 
         $arr = array_map(function($instance){
-            return $instance['compressionPercentage'];
+            return $instance['compression:percentage'];
         }, $functionDetails['history']);
 
-        printf("\n    compressionPercentage min/max: %.1f%%/%.1f%%", min($arr), max($arr));
-        printf("\n    compressionPercentage avg: %.1f%%", array_sum($arr)/count($arr));
-        printf("\n    compressionPercentage median: %.1f%%", median($arr));
+        printf("\n    compression:percentage min/max: %.1f%%/%.1f%%", min($arr), max($arr));
+        printf("\n    compression:percentage avg: %.1f%%", array_sum($arr)/count($arr));
+        printf("\n    compression:percentage median: %.1f%%", median($arr));
 
 
         $arr = array_map(function($instance){
@@ -117,11 +131,21 @@ else {
 
 
         $arr = array_map(function($instance){
+            return $instance['compression:duration'];
+        }, $functionDetails['history']);
+
+        printf("\n    compression:duration min/max: %.3fs/%.3fs", min($arr), max($arr));
+        printf("\n    compression:duration avg: %.3fs", array_sum($arr)/count($arr));
+        printf("\n    compression:duration median: %.3fs", median($arr));
+
+
+        $arr = array_map(function($instance){
             return $instance['comparedToOriginal:isLarger'];
         }, $functionDetails['history']);
 
         printf("\n    comparedToOriginal:isLarger: yes:%d, no:%d", count(array_filter($arr)), count($arr) - count(array_filter($arr)));
         printf("\n    comparedToOriginal:isLarger avg: %.1f%% tests were larger", 100*count(array_filter($arr))/count($arr));
+
 
         printf("\n");
     }
