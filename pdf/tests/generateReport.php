@@ -112,6 +112,9 @@ else {
     foreach ($reportJSON as $function=>$functionDetails) {
         printf("\n%s, %d files tested", $function, count($functionDetails['history']));
 
+
+
+
         $arr = array_map(function($instance){
             return $instance['compression:percentage'];
         }, $functionDetails['history']);
@@ -119,6 +122,7 @@ else {
         printf("\n    compression:percentage min/max: %.1f%%/%.1f%%", min($arr), max($arr));
         printf("\n    compression:percentage avg: %.1f%%", array_sum($arr)/count($arr));
         printf("\n    compression:percentage median: %.1f%%", median($arr));
+
 
 
         $arr = array_map(function($instance){
@@ -130,6 +134,7 @@ else {
         printf("\n    overall:order median: %d", median($arr));
 
 
+
         $arr = array_map(function($instance){
             return $instance['compression:duration'];
         }, $functionDetails['history']);
@@ -137,6 +142,7 @@ else {
         printf("\n    compression:duration min/max: %.3fs/%.3fs", min($arr), max($arr));
         printf("\n    compression:duration avg: %.3fs", array_sum($arr)/count($arr));
         printf("\n    compression:duration median: %.3fs", median($arr));
+
 
 
         $arr = array_map(function($instance){
