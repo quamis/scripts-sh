@@ -9,6 +9,22 @@
 
 # pdf.autoShrinkOneFile.sh FILE=tests/input.pdf
 
+
+if [ "$1" = "--help" ]; then
+    cat <<HELP
+    $0 [options]
+	FILE=./input.pdf
+	OFILE="\$FILE-compressed,__SIZE__,__INDEX__,__METHOD__.pdf"
+	VERBOSE=1,0
+	KEEP=smallest,largest,smaller,none,all
+	METHODS=default,hiq,lowq,all,gs,destructive
+	RUN_MODE=parallel,sequential,dry-run
+HELP
+
+	exit 1;
+fi;
+
+
 # inspired by http://www.alfredklomp.com/programming/shrinkpdf, completly rewritten
 
 # THIS ALLOWS INJECTING VARS into the local namespace

@@ -3,6 +3,21 @@
 # pdf.autoShrink.sh KEEP=smaller METHODS=hiq  DIR='./courses/';
 
 
+if [ "$1" = "--help" ]; then
+    cat <<HELP
+    $0 [options]
+	DIR=./
+	KEEP=smallest,largest,smaller,none,all
+	METHODS=default,hiq,lowq,all,gs,destructive
+	RECURSE=0,1
+	RUN_MODE=parallel,sequential,dry-run
+HELP
+
+	exit 1;
+fi;
+
+
+
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
@@ -24,7 +39,6 @@ done
 : ${RUN_MODE:="parallel"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
-
 
 # clear the command list
 echo > "$COMMANDFILE";
