@@ -61,7 +61,7 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	fi;
 
     # for PNG quality encoding, see https://stackoverflow.com/questions/9710118/convert-multipage-pdf-to-png-and-back-linux/12046542#12046542
-	CMD="(mkdir -p \"${ODIR}\" && pdf.autoShrinkOneFile.sh FILE=\"${FILE_DIR_AND_NAME_AND_EXT}\" OFILE=\"${ODIR}/${FILE_NAME_WITH_EXT}\" KEEP=\"${KEEP}\" VERBOSE="0" )"
+	CMD="(mkdir -p \"${ODIR}\" && pdf.autoShrinkOneFile.sh FILE=\"${FILE_DIR_AND_NAME_AND_EXT}\" OFILE=\"${ODIR}/${FILE_NAME_WITH_EXT}\" KEEP=\"${KEEP}\" METHODS=\"${METHODS}\" VERBOSE="0" )"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
