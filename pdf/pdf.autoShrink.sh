@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# pdf.autoShrink.sh DIR='./cources/';
+# pdf.autoShrink.sh KEEP=smaller METHODS=hiq  DIR='./courses/';
 
 
 # THIS ALLOWS INJECTING VARS into the local namespace
