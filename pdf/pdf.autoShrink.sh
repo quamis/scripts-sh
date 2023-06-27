@@ -62,20 +62,22 @@ for FILE in `find "${DIR}/" -maxdepth ${maxdepth} -type f -print | egrep "\.(${r
 	FILE_NAME="${FILE_NAME%.*}"
 	FILE_NAME_WITH_EXT="${FILE_DIR_AND_NAME_AND_EXT##*/}"
 	FILE_DIR="${FILE_DIR_AND_NAME_AND_EXT%/*}/"
+	FILE_RELATIVE_DIR="${FILE_DIR/"$DIR/"/}"
 
 	# TMP_FILE=`mktemp "${TMPDIR}pdf.XXXXXXXXXXXXXXXXXXXXXXX.m4a"`
 
 	# DEBUGGING
 	if [ "$VERBOSE" = "1" ]; then
-		echo "FILE::$FILE_DIR_AND_NAME_AND_EXT"
-		echo "    FILE_DIR:            $FILE_DIR"
-		echo "    FILE_NAME_WITH_EXT:  $FILE_NAME_WITH_EXT"
-		echo "    FILE_NAME:           $FILE_NAME"
-		echo "    FILE_EXT:            $FILE_EXT"
+		echo "FILE::$FILE_DIR_AND_NAME_AND_EXT";
+		echo "    FILE_DIR:            $FILE_DIR";
+		echo "    FILE_NAME_WITH_EXT:  $FILE_NAME_WITH_EXT";
+		echo "    FILE_NAME:           $FILE_NAME";
+		echo "    FILE_EXT:            $FILE_EXT";
+		echo "    FILE_RELATIVE_DIR:   $FILE_RELATIVE_DIR";
 	fi;
 
     # for PNG quality encoding, see https://stackoverflow.com/questions/9710118/convert-multipage-pdf-to-png-and-back-linux/12046542#12046542
-	CMD="(mkdir -p \"${ODIR}\" && pdf.autoShrinkOneFile.sh FILE=\"${FILE_DIR_AND_NAME_AND_EXT}\" OFILE=\"${ODIR}/${FILE_NAME_WITH_EXT}\" KEEP=\"${KEEP}\" METHODS=\"${METHODS}\" VERBOSE="0" )"
+	CMD="(mkdir -p \"${ODIR}/${FILE_RELATIVE_DIR}\" && pdf.autoShrinkOneFile.sh FILE=\"${FILE_DIR_AND_NAME_AND_EXT}\" OFILE=\"${ODIR}/${FILE_RELATIVE_DIR}/${FILE_NAME_WITH_EXT}\" KEEP=\"${KEEP}\" METHODS=\"${METHODS}\" VERBOSE="0" )"
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
