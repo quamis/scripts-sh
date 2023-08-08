@@ -1,4 +1,7 @@
 
+python3 -m pip install -U yt-dlp
+
+
 # video.download.youtube.sh DOWNLOADER=yt-dlp DOWNLOAD_SUBS=yes SPEED=1024 URL=https://www.youtube.com/watch?v=aaaaaaaaaaaaa
 
 
