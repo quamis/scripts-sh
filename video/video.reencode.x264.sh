@@ -7,6 +7,11 @@
 #     find . -type f -exec bash -c "video.is.AV1.sh FILE='{}' && video.reencode.x264.sh CLEANUP=yes FILE='{}';" \;
 
 
+# tests on 8Mb file
+#   320x, threads 4, 46s, 6.1Mb
+#   320x, threads 1, 46s, 6.1Mb
+#   320x, threads 2, 46s, 6.1Mb
+
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
 for ARGUMENT in "$@"; do
