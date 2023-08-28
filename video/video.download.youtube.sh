@@ -48,7 +48,7 @@ done
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
 
-: ${DOWNLOADER:="youtube-dl"};	# youtube-dl, yt-dlp
+: ${DOWNLOADER:="yt-dlp"};	# youtube-dl, yt-dlp
 
 
 
@@ -91,13 +91,19 @@ for URL in `echo "$LIST" | sort`; do
 	if [[ "$REORGANISE" == "playlist" ]]; then
 		C2="--output '%(playlist)s/%(playlist_index)s- %(title)s.%(ext)s' ";
 	fi;
+	if [[ "$REORGANISE" == "date" ]]; then
+		C2="--output '%(upload_date>%Y-%m-%d)s - %(title)s.%(ext)s' ";
+	fi;
 
 
 	if [[ "$DOWNLOAD_SUBS" == "yes" ]]; then
 		C1="$C1 --write-sub --write-auto-sub --sub-lang ro,en --sub-format srt --convert-subs srt ";
 	fi;
 
-	CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER $C1 --rate-limit ${SPEED_LIMIT_KB}k -f 'bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio' $C2 $EXTRA_ARGS --geo-bypass --merge-output-format mkv --encoding utf-8 \"${URL}\";)"
+	C3="bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# hi-q
+	# C3="bestvideo[height<=320][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# low-q
+	OUTPUTFORMAT="mkv";
+	CMD="(mkdir -p \"${DIR}\" && ${DOWNLOADER} ${C1} --rate-limit ${SPEED_LIMIT_KB}k -f '${C3}' ${C2} ${EXTRA_ARGS} --geo-bypass --merge-output-format ${OUTPUTFORMAT} --encoding utf-8 \"${URL}\";)"
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
 	fi;
