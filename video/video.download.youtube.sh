@@ -89,10 +89,10 @@ for URL in `echo "$LIST" | sort`; do
 
 	C2="";
 	if [[ "$REORGANISE" == "playlist" ]]; then
-		C2="--output '%(playlist)s/%(playlist_index)s- %(title)s.%(ext)s' ";
+		C2="--output '%(playlist)s/%(playlist_index)s- %(title)s [%(id)].%(ext)s' ";
 	fi;
 	if [[ "$REORGANISE" == "date" ]]; then
-		C2="--output '%(upload_date>%Y-%m-%d)s - %(title)s.%(ext)s' ";
+		C2="--output '%(upload_date>%Y-%m-%d)s - %(title)s [%(id)].%(ext)s' ";
 	fi;
 
 
