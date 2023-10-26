@@ -36,7 +36,7 @@ done
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
 
-: ${DOWNLOADER:="youtube-dl"};	# youtube-dl, yt-dlp
+: ${DOWNLOADER:="yt-dlp"};	# youtube-dl, yt-dlp
 
 
 
