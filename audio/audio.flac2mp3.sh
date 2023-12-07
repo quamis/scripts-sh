@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # usage:
-# 	audio.flac2mp3.sh EXT=flac,mp3 PRESET=m4a,3 RUN_MODE=parallel CLEANUP=yes
+#   HI-q
+# 	    audio.flac2mp3.sh EXT=flac,mp3 PRESET=m4a,3 RUN_MODE=parallel CLEANUP=yes
+#   MED-q
+# 	    audio.flac2mp3.sh EXT=flac,mp3 PRESET=m4a,5 RUN_MODE=parallel CLEANUP=yes
+#   LOW-q
+# 	    audio.flac2mp3.sh EXT=flac,mp3 PRESET=m4a,8 RUN_MODE=parallel CLEANUP=yes
 
 
 # THIS ALLOWS INJECTING VARS into the local namespace
