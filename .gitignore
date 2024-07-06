@@ -5,3 +5,4 @@ google takeout merger/log.log
 google takeout merger/trash/*
 google takeout merger/log-safe.log
 google takeout merger/log-safe.old.log
+google takeout merger/log-safe.old.log-*
