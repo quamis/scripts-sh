@@ -44,6 +44,8 @@ done
 
 : ${REORGANISE:="no"};
 
+: ${VIDEO_SIZE:="720"};
+
 : ${RUN_MODE:="sequential"};	# 'dry-run', 'parallel', 'sequential'
 : ${THREADS:="`parallel --no-notice --number-of-cores`"};
 : ${MAX_LOAD:="95%"};
@@ -101,6 +103,20 @@ for URL in `echo "$LIST" | sort`; do
 	fi;
 
 	C3="bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# hi-q
+	if [[ "$VIDEO_SIZE" == "320" ]]; then
+		C3="bestvideo[height<=320][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# hi-q
+	fi;
+	if [[ "$VIDEO_SIZE" == "720" ]]; then
+		C3="bestvideo[height<=720][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# hi-q
+	fi;
+	if [[ "$VIDEO_SIZE" == "1080" ]]; then
+		C3="bestvideo[height<=1080][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# hi-q
+	fi;
+	if [[ "$VIDEO_SIZE" == "1440" ]]; then
+		C3="bestvideo[height<=1440][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# hi-q
+	fi;
+
+
 	# C3="bestvideo[height<=320][vcodec!*=av01]+bestaudio/bestvideo+bestaudio";		# low-q
 	OUTPUTFORMAT="mkv";
 	CMD="(mkdir -p \"${DIR}\" && ${DOWNLOADER} ${C1} --rate-limit ${SPEED_LIMIT_KB}k -f '${C3}' ${C2} ${EXTRA_ARGS} --geo-bypass --merge-output-format ${OUTPUTFORMAT} --encoding utf-8 \"${URL}\";)"
