@@ -16,7 +16,7 @@ mv "$TOF.1" "$TOF";
 
 i=0;
 while [ $i -le 2000000 ]; do
-    SFX=`date "+%Y%m%d%H%M%S"`;
+    SFX=`date "+%H%M%S$RANDOM"`;
 
     # cp "$TOF" "$DST/$OF.$i.txt" || { echo 'cp failed' ; exit 1; };
     # pv "$TOF" > "$DST/$OF.$i.txt" || { echo 'cp failed' ; exit 1; };
