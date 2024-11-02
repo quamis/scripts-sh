@@ -1,5 +1,5 @@
 ```bash
-./merge.auto.sh D1='/media/BIG/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis'  PROFILE="quamis" RUN_MODE=safe
+./merge.auto.sh D1='/media/BIG/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis' PROFILE="quamis" RUN_MODE=safe
 
 rm ./trash/*
 

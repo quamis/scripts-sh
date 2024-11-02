@@ -2,7 +2,7 @@
 
 # use as:
 #      tar -xzvf ./1.tgz && tar -xzvf ./2.tgz
-#     ./merge.auto.sh D1='/media/lucian/BIG2T1/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis' PROFILE="quamis" RUN_MODE=safe
+#     ./merge.auto.sh D1='/media/BIG/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis' PROFILE="quamis" RUN_MODE=safe
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
@@ -150,13 +150,13 @@ fi
 
     elif [ "$RUN_MODE" = "safe" ]; then
         printf "\nRUN_MODE:   ${GREEN}%s${NC}" "$RUN_MODE";
-        printf "\n ... wait 5 seconds, in case you change your mind";
-        sleep 5;
+        printf "\n ... wait 2 seconds, in case you change your mind";
+        sleep 2;
 
     elif [ "$RUN_MODE" = "unsafe" ]; then
         printf "\nRUN_MODE:   ${RED}%s${NC}" "$RUN_MODE";
-        printf "\n ... wait 15 seconds, in case you change your mind";
-        sleep 15;
+        printf "\n ... wait 5 seconds, in case you change your mind";
+        sleep 5;
     fi;
 
     # build the list of image and movies, ignoring json files
@@ -196,6 +196,18 @@ fi
         printf "\nIf you are sure that's the final target, put the 'original_takeout.lock' in the root folder\n";
         exit;
     fi;
+
+    if [ "$RUN_MODE" = "dry-run" ]; then
+        sleep 1;
+    elif [ "$RUN_MODE" = "safe" ]; then
+        printf "\n ... wait 5 seconds, in case you change your mind";
+        sleep 5;
+
+    elif [ "$RUN_MODE" = "unsafe" ]; then
+        printf "\n ... wait 15 seconds, in case you change your mind";
+        sleep 15;
+    fi;
+
 
     # 1.1. delete identical files in D1
     printf "\n${GREEN}======================================================${NC}\n";
