@@ -2,7 +2,7 @@
 
 # use as:
 #      tar -xzvf ./1.tgz && tar -xzvf ./2.tgz
-#     ./merge.auto.sh D1='/media/lucian/BIG2T1/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis' RUN_MODE=safe
+#     ./merge.auto.sh D1='/media/lucian/BIG2T1/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis' PROFILE="quamis" RUN_MODE=safe
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
@@ -14,12 +14,13 @@ done
 
 : ${D1:=""};
 : ${D2:=""};
+: ${PROFILE:=""};
 
 : ${TMPDIR:="/tmp/"};
 : ${TRASH:="./trash/"};
 : ${RUN_MODE:="dry-run"};
-: ${LOG:="./log-${RUN_MODE}.log"};
-: ${LOGOLD:="./log-${RUN_MODE}.old.log"};
+: ${LOG:="./log-${RUN_MODE}-${PROFILE}.log"};
+: ${LOGOLD:="./log-${RUN_MODE}-${PROFILE}.old.log"};
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -36,6 +37,12 @@ if [ -z "$D2" ]; then
     echo "Please specify D2, the final, merged takeout destination";
     exit;
 fi;
+
+if [ -z "$PROFILE" ]; then
+    echo "Please specify PROFILE, the profile name";
+    exit;
+fi;
+
 
 TMP1=`mktemp --tmpdir="${TMPDIR}"`;
 TMP2=`mktemp --tmpdir="${TMPDIR}"`;
