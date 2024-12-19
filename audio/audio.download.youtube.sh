@@ -37,6 +37,7 @@ done
 : ${MAX_LOAD:="95%"};
 
 : ${DOWNLOADER:="yt-dlp"};	# youtube-dl, yt-dlp
+: ${USE_COOKIES:="no"};	# chrome, firefox
 
 
 
@@ -70,7 +71,12 @@ for URL in `echo "$LIST" | sort`; do
 	fi;
 
     # for more options, see the manual
-	CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER -f \"bestaudio[ext=m4a]/bestaudio[ext=ogg]/bestaudio[ext=mp3]/bestaudio\" --sleep-interval=${SLEEP_BETWEEN_REQUESTS} --rate-limit=${SPEED_LIMIT_KB}k -c --extract-audio \"${URL}\" --output=\"${DIR}/%(playlist_index)s - %(title)s.%(ext)s\";)"
+	CMD="(mkdir -p \"${DIR}\" && $DOWNLOADER";
+	if [[ "$USE_COOKIES" == "firefox" || "$USE_COOKIES" == "chrome" ]]; then
+		CMD="$CMD --cookies-from-browser $USE_COOKIES";
+	fi;
+	CMD="$CMD -f \"bestaudio[ext=m4a]/bestaudio[ext=ogg]/bestaudio[ext=mp3]/bestaudio\" --sleep-interval=${SLEEP_BETWEEN_REQUESTS} --rate-limit=${SPEED_LIMIT_KB}k -c --extract-audio \"${URL}\" --output=\"${DIR}/%(playlist_index)s - %(title)s.%(ext)s\"";
+	CMD="$CMD;)";
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "$CMD";
