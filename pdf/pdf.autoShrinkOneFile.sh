@@ -51,8 +51,6 @@ done
 : ${MAX_LOAD:="95%"};
 
 
-
-
 helper_gs_generalShrink () {
 	local INPUT="$1"
 	local OUTPUT="$2"
@@ -144,6 +142,26 @@ helper_gs_shrinkImages_printer () {
 
 }
 
+helper_pdfcpu_generalShrink () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+	local PARAMS="$3"
+
+	# @see https://pdfcpu.io/core/optimize
+
+	# in order to make pdftk work on Ubuntu, you need to
+	#	PDFCPU_VERSION=$(curl -s "https://api.github.com/repos/pdfcpu/pdfcpu/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+	#	echo $PDFCPU_VERSION
+	#	wget -qO pdfcpu.tar.xz https://github.com/pdfcpu/pdfcpu/releases/latest/download/pdfcpu_${PDFCPU_VERSION}_Linux_x86_64.tar.xz
+	# copy pdfcpu to ~/bin/pdfcpu
+
+	if hash pdfcpu 2>/dev/null; then
+		pdfcpu optimize $PARAMS "$INPUT" "$OUTPUT" 2>&1 # 1>/dev/null
+	# else
+		# echo "pdfcpu is not installed"
+	fi
+}
+
 
 helper_qpdf_generalShrink () {
 	local INPUT="$1"
@@ -153,7 +171,11 @@ helper_qpdf_generalShrink () {
 	# in order to make pdftk work on Ubuntu, you need to
 	#	apt install qpdf
 
-	qpdf $PARAMS "$INPUT" "$OUTPUT"
+	if hash qpdf 2>/dev/null; then
+		qpdf $PARAMS "$INPUT" "$OUTPUT"
+	# else
+		# echo "qpdf is not installed"
+	fi
 }
 
 # -------------------------------------------------------------------------------------------------
@@ -417,7 +439,11 @@ shrink_pdftk () {
 	# in order to make pdftk work on Ubuntu, you need to
 	#	sudo snap install pdftk
 
-	pdftk "$INPUT" output "$OUTPUT" compress
+	if hash pdftk 2>/dev/null; then
+		pdftk "$INPUT" output "$OUTPUT" compress
+	# else
+		# echo "pdftk is not installed"
+	fi
 }
 
 shrink_gs_v11 () {
@@ -536,6 +562,23 @@ shrink_qpdf_v11 () {
 	helper_qpdf_generalShrink "$INPUT" "$OUTPUT" "--object-streams=generate --compress-streams=y --recompress-flate --compression-level=9 --optimize-images"
 }
 
+shrink_pdfcpu_v11 () {
+	local INPUT="$1"
+	local OUTPUT="$2"
+
+	if [[ "$INPUT" == ".descript" ]]; then
+		echo -ne "use pdfcpu, not sure what is optimizes";
+		return;
+	fi;
+	if [[ "$INPUT" == ".category" ]]; then
+		echo -ne "default";
+		return;
+	fi;
+
+	helper_pdfcpu_generalShrink "$INPUT" "$OUTPUT" ""
+}
+
+
 ALLMETHODS=$(compgen -A function | egrep "shrink_" | tr "\n" ",");
 ALLMETHODS_ARR=(${ALLMETHODS//,/ });
 ALLMETHODS_CATEGORIES=();
@@ -599,7 +642,7 @@ fi
 
 FILES_ARR=()
 for M in "${METHODS_ARR[@]}"; do
-	TMPFILE=`mktemp --suffix ".${M}" --tmpdir="${TMPDIR}"`;
+	TMPFILE=`mktemp --suffix ".${M}.pdf" --tmpdir="${TMPDIR}"`;
 
 	if [ "$VERBOSE" = "1" ]; then
 		echo "(printf '    %-*s: ' 25 \"$M\" && $M \"$FILE\" \"$TMPFILE\" && du -sh \"$TMPFILE\")" >> "$COMMANDFILE";
