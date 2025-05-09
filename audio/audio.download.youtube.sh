@@ -9,6 +9,8 @@
 # to check if installed via pip, do this:
 # 	pip list | grep youtube-dl
 
+# @see https://github.com/coletdjnz/yt-dlp-get-pot
+
 
 
 
