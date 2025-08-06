@@ -1,8 +1,21 @@
 #!/bin/bash
 
-# use as:
+# Google Takeout Merger Script
+# Merges new Google Takeout data (D1) into existing collection (D2)
+#
+# IMPORTANT: Double-check your D2 path! Make sure you're pointing to the correct destination.
+# This script will DELETE files from D1 that already exist in D2.
+#
+# Usage:
 #      tar -xzvf ./1.tgz && tar -xzvf ./2.tgz
-#     ./merge.auto.sh D1='/media/BIG/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/lucian/BIG2T1/picturesFromPhone/google-takeout-quamis' PROFILE="quamis" RUN_MODE=safe
+#      ./merge.auto.sh D1='/media/BIG/tmp/google-takeout-quamis/Takeout/Google Photos' D2='/media/BIG/picturesFromPhone/google-takeout-quamis' PROFILE="quamis" RUN_MODE=safe
+#
+# Script behavior:
+# 1. Deletes identical files from D1 (same name + size in both D1 and D2)
+# 2. Deletes files from D1 that were previously moved (based on log)
+# 3. Moves new files from D1 to D2
+# 4. For changed files (same name, different size): moves larger to D2, deletes smaller from D1
+# 5. Moves remaining JSON metadata files from D1 to D2
 
 # THIS ALLOWS INJECTING VARS into the local namespace
 # might not be very secure, be careful how you declare & check variables
@@ -209,7 +222,9 @@ fi
     fi;
 
 
-    # 1.1. delete identical files in D1
+    # PHASE 1.1: Delete identical files from D1
+    # Files with same name AND same size in both D1 and D2 are considered identical
+    # These can be safely deleted from D1 since they already exist in D2
     printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}delete identical files from D1, also in D2${NC}";
     comm --output-delimiter=""  -12 "$TMP1" "$TMP2" | cut -d$'\t' -f1 | sort > "$TMP11";
@@ -225,7 +240,9 @@ fi
     printf "\n${YELLOW}%9d %s${NC}" $COUNT "files deleted";
     printf "\n";
 
-    # 1.2. delete older files that were already moved
+    # PHASE 1.2: Delete files that were previously moved
+    # Based on the previous run's log, delete files from D1 that were already moved to D2
+    # This handles cases where the script was run multiple times
     printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}delete already moved files from D1, as reported in the last log${NC}";
     COUNT=$(( 0 ));
@@ -241,7 +258,8 @@ fi
     printf "\n";
 
 
-    # 2. move new files from D1 to D2
+    # PHASE 2: Move new files from D1 to D2
+    # Files that exist in D1 but not in D2 are new and should be moved
     printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}move new files from D1 to D2${NC}";
     rebuildImageList;
@@ -265,7 +283,10 @@ fi
     printf "\n";
 
 
-    # 3. lookup changed files, move files if larger, delete if smaller
+    # PHASE 3: Handle changed files (same name, different size)
+    # For files with the same name but different sizes:
+    # - If D1 version is larger: move it to D2 (replace the smaller version)
+    # - If D1 version is smaller or equal: delete it from D1 (keep the larger version in D2)
     printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}lookup changed files, move files to D2 if larger, delete from D1 if smaller${NC}";
     rebuildImageList;
@@ -287,14 +308,14 @@ fi
         F2SIZE=$( stat --format="%s" "$D2FILE" );
 
         if [ "$F1SIZE" -gt "$F2SIZE" ]; then
-            COUNT1=$(( $COUNT + 1 ));
+            COUNT1=$(( $COUNT1 + 1 ));
             custom_mv "$D1FILE" "$D2FILE";
         else
-            COUNT2=$(( $COUNT + 1 ));
+            COUNT2=$(( $COUNT2 + 1 ));
             if [ "$F1SIZE" -eq "$F2SIZE" ]; then
                 custom_rm "$D1FILE" "equal filesizes";
             else
-                custom_rm "$D1FILE" "`printf "%s vs %s"` $F1SIZE $F2SIZE";
+                custom_rm "$D1FILE" "`printf "%s vs %s" $F1SIZE $F2SIZE`";
             fi;
         fi;
     done;
@@ -303,8 +324,9 @@ fi
     printf "\n";
 
 
-    # next, we're left with json files, these should simply get copied over, As we can assume they're newer
-    # build the list of files
+    # PHASE 4: Move remaining JSON metadata files
+    # JSON files contain metadata and are assumed to be newer in D1
+    # These should be moved to D2 to keep metadata up to date
     printf "\n${GREEN}======================================================${NC}\n";
     printf "\n${GREEN}we're left with json files, these should simply get copied over, as we can assume they're newer${NC}";
     find "$D1" -name "*.json" -type f -printf '%P\t%s\n'| sort > "$TMP1";
@@ -324,7 +346,7 @@ fi
         custom_mv "$D1FILE" "$D2FILE";
     done;
     unset IFS;
-    printf "\n${YELLOW}%9d %s,${NC}" $COUNT1 "files moved";
+    printf "\n${YELLOW}%9d %s${NC}" $COUNT "files moved";
     printf "\nfinished at: %s" "`date "+%Y-%m-%d %H:%M:%S"`";
 
     rm -f "$TMP1";
